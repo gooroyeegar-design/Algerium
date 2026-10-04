@@ -8,6 +8,9 @@ add_library(algerium_engine STATIC
     src/layout.cpp
     src/html_parser.cpp
     src/engine.cpp
+    src/security.cpp
+    src/events.cpp
+    src/navigation.cpp
 )
 target_include_directories(algerium_engine PUBLIC include)
 if(MSVC)
