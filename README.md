@@ -1,12 +1,22 @@
 # Algerium
 
-A from-scratch Android browser experiment for Algeria.
+Algerium is an independent Android browser project. It does not embed Chromium, Android WebView, Gecko, WebKit, or another browser engine.
 
-## Independence
-Algerium does **not** embed Chromium, Android WebView, Gecko, WebKit, or another browser engine. Its networking, document parsing, layout and drawing are implemented in this project using Android platform primitives only.
+## Everyday-browser features in 0.2
+- Native Android browser shell
+- Address/search bar
+- Back/forward/reload
+- Home/new tab page
+- Browsing history
+- Bookmarks UI foundation
+- Find in page
+- Share page
+- Settings/privacy controls foundation
+- Independent HTML/text parser and Canvas renderer
+- HTTPS networking and redirect handling
+- Scrollable pages
+- Error pages
+- GitHub APK CI
 
-## Current engine
-The first engine supports a deliberately small HTML/text subset. It is an independent renderer, not a compatibility claim for the modern web. The project is designed to grow its own HTML, CSS, scripting, layout, image, storage and security subsystems over time.
-
-## Build
-Open in Android Studio or run `gradle assembleDebug`.
+## Important architecture note
+This is genuinely independent, but independence has a cost: this is **not** yet a standards-complete Chrome replacement. The engine is being built incrementally. JavaScript execution, full CSS layout, images, forms, cookies/storage, downloads, permissions, media, accessibility, service workers, extensions and robust site compatibility require substantial additional engine work and are next-stage targets.
