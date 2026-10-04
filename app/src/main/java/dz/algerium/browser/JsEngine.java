@@ -2,7 +2,7 @@ package dz.algerium.browser;
 
 import android.os.SystemClock;
 import com.whl.quickjs.wrapper.JSCallFunction;
-import com.whl.quickjs.wrapper.JSObject;
+import com.whl.quickjs.wrapper.JSObject;import com.whl.quickjs.wrapper.QuickJSLoader;
 import com.whl.quickjs.wrapper.QuickJSContext;
 import java.io.*;import java.net.*;import java.util.*;import java.util.concurrent.*;
 
@@ -15,12 +15,12 @@ public final class JsEngine {
  private void init(){
   if(ctx!=null)return;
   ctx=QuickJSContext.create();
-  JSObject console=ctx.createJSObject();
-  console.set("log",new JSCallFunction(){public Object call(Object...a){return null;}});
-  console.set("warn",new JSCallFunction(){public Object call(Object...a){return null;}});
-  console.set("error",new JSCallFunction(){public Object call(Object...a){return null;}});
-  ctx.getGlobalObject().set("console",console);
-  ctx.getGlobalObject().set("algeriumFetch",new JSCallFunction(){public Object call(Object...a){if(a.length==0)return "";try{return fetch(String.valueOf(a[0]));}catch(Exception e){lastError=e.toString();return "";}}});
+  JSObject console=ctx.createNewJSObject();
+  console.setProperty("log",new JSCallFunction(){public Object call(Object...a){return null;}});
+  console.setProperty("warn",new JSCallFunction(){public Object call(Object...a){return null;}});
+  console.setProperty("error",new JSCallFunction(){public Object call(Object...a){return null;}});
+  ctx.getGlobalObject().setProperty("console",console);
+  ctx.getGlobalObject().setProperty("algeriumFetch",new JSCallFunction(){public Object call(Object...a){if(a.length==0)return "";try{return fetch(String.valueOf(a[0]));}catch(Exception e){lastError=e.toString();return "";}}});
  }
  public String run(String html,String baseUrl){
   try{return jsThread.submit(()->runOnThread(html,baseUrl)).get(45,TimeUnit.SECONDS);}
