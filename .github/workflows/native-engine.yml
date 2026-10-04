@@ -1,0 +1,54 @@
+name: Algerium native engine
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  engine:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install native dependencies
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            sudo apt-get update
+            sudo apt-get install -y cmake g++ libsdl2-dev libsdl2-ttf-dev libcurl4-openssl-dev
+          elif [ "$RUNNER_OS" = "macOS" ]; then
+            brew install cmake sdl2 sdl2_ttf curl pkg-config
+          else
+            vcpkg install sdl2 sdl2-ttf curl:x64-windows
+          fi
+      - name: Configure engine tests
+        run: cmake -S engine -B build-engine -DALGERIUM_ENGINE_TESTS=ON
+      - name: Build and test engine
+        run: cmake --build build-engine --config Release --parallel
+      - name: Run engine tests
+        run: ctest --test-dir build-engine -C Release --output-on-failure
+      - name: Configure desktop browser
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake -S desktop -B build-desktop -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+          else
+            cmake -S desktop -B build-desktop
+          fi
+      - name: Build desktop browser
+        run: cmake --build build-desktop --config Release --parallel
+      - name: Package desktop binary
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          if [ "$RUNNER_OS" = "Windows" ]; then cp build-desktop/Release/algerium_desktop.exe artifacts/Algerium-Windows.exe;
+          elif [ "$RUNNER_OS" = "macOS" ]; then cp build-desktop/algerium_desktop artifacts/Algerium-macOS;
+          else cp build-desktop/algerium_desktop artifacts/Algerium-Linux;
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Algerium-${{ matrix.os }}
+          path: artifacts/*
