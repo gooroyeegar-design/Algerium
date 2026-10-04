@@ -9,12 +9,22 @@ std::vector<LayoutBox> layout_document(const Document& doc,const std::vector<Css
   if(n->type==Node::Type::Text)return;
   ComputedStyle s=compute_style(rules,n->name,n->attrs,parent);
   float w=s.width>0?s.width:viewport_width-16;
+  bool flex=s.display=="flex";
   float h=s.height>0?s.height:(blockish(n->name,s)?24:0);
   if(n->name=="h1")h=42;if(n->name=="h2")h=34;if(n->name=="p")h=28;
   out.push_back({n,s,x,y,w,h});
   ComputedStyle childStyle=s;
   if(blockish(n->name,s))y+=h;
-  for(auto&c:n->children)walk(c.get(),x,&childStyle);
+  if(flex){
+   float cx=x;
+   for(auto&c:n->children){
+    if(c->type==Node::Type::Text)continue;
+    walk(c.get(),cx,&childStyle);
+    if(!out.empty())cx=out.back().x+out.back().width;
+   }
+  } else {
+   for(auto&c:n->children)walk(c.get(),x,&childStyle);
+  }
  };
  walk(doc.root.get(),8,nullptr);return out;
 }
