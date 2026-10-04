@@ -70,9 +70,9 @@ public class MainActivity extends Activity{
  }
 
  void showAdmin(){
-  String s="Algerium security diagnostics\n\nJS runtime: QuickJS\nScripts executed: "+JsEngine.get().getScriptsRun()
+  String s="Algerium security diagnostics\n\nJS runtime: QuickJS (isolated Android process)\nSandbox bound: "+JsEngine.get().isSandboxBound()+"\nScripts executed: "+JsEngine.get().getScriptsRun()
    +"\nLast JS error: "+JsEngine.get().getLastError()+"\nLast JS run: "+JsEngine.get().getLastRunMs()+" ms"
-   +"\n\nRenderer: independent Canvas\nChromium/WebView: not used"
+   +"\n\nRenderer: independent Canvas\nChromium/WebView: not used\nJS network: denied inside sandbox; browser process brokers only validated script loads"
    +"\nNetwork: HTTPS-only app traffic; private-network JS fetch blocked"
    +"\nPage/script size limits: enabled"
    +"\n\nThis panel is local. Browsing data is not uploaded.";
