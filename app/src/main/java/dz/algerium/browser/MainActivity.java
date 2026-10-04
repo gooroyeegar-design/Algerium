@@ -3,7 +3,7 @@ package dz.algerium.browser;
 import android.app.*;import android.os.*;import android.content.*;import android.graphics.*;import android.graphics.drawable.*;import android.net.Uri;import android.view.*;import android.view.inputmethod.EditorInfo;import android.widget.*;import java.net.*;import java.util.*;
 
 public class MainActivity extends Activity{
- EditText address,homeSearch; PageView page; TextView title; ArrayList<String> history=new ArrayList<>(),bookmarks=new ArrayList<>(); String current="about:home";
+ EditText address,homeSearch; LinearLayout homeLayer; PageView page; TextView title; ArrayList<String> history=new ArrayList<>(),bookmarks=new ArrayList<>(); String current="about:home";
  int beige=Color.rgb(243,232,210), cream=Color.rgb(255,249,238), green=Color.rgb(49,88,58), brown=Color.rgb(107,89,69);
  @Override public void onCreate(Bundle b){super.onCreate(b);getWindow().setStatusBarColor(beige);getWindow().setNavigationBarColor(beige);getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);build();home();}
  TextView tv(String s,float z){TextView x=new TextView(this);x.setText(s);x.setTextSize(z);x.setTextColor(brown);x.setGravity(Gravity.CENTER);return x;}
@@ -20,7 +20,7 @@ public class MainActivity extends Activity{
   address=new EditText(this);address.setSingleLine();address.setTextSize(16);address.setTextColor(brown);address.setHintTextColor(Color.rgb(150,137,116));address.setHint("Search or enter address…");address.setPadding(18,0,18,0);address.setBackgroundResource(dz.algerium.browser.R.drawable.rounded_search);address.setImeOptions(EditorInfo.IME_ACTION_GO);bar.addView(address,new LinearLayout.LayoutParams(0,46,1));
   Button menu=b("⋮");menu.setTextSize(25);bar.addView(menu,p(42,46));root.addView(bar);
   FrameLayout content=new FrameLayout(this);page=new PageView(this);content.addView(page,new FrameLayout.LayoutParams(-1,-1));
-  LinearLayout homeLayer=new LinearLayout(this);homeLayer.setOrientation(LinearLayout.VERTICAL);homeLayer.setGravity(Gravity.CENTER_HORIZONTAL);homeLayer.setPadding(30,30,30,28);homeLayer.setBackgroundColor(Color.TRANSPARENT);
+  homeLayer=new LinearLayout(this);homeLayer.setOrientation(LinearLayout.VERTICAL);homeLayer.setGravity(Gravity.CENTER_HORIZONTAL);homeLayer.setPadding(30,30,30,28);homeLayer.setBackgroundColor(Color.TRANSPARENT);
   ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.ic_algerium);homeLayer.addView(logo,new LinearLayout.LayoutParams(126,126));
   TextView tagline=tv("a browser for Algeria",22);tagline.setTextColor(green);tagline.setLetterSpacing(.18f);LinearLayout.LayoutParams tp=new LinearLayout.LayoutParams(-2,48);tp.topMargin=12;homeLayer.addView(tagline,tp);
   homeSearch=new EditText(this);homeSearch.setSingleLine(true);homeSearch.setTextSize(18);homeSearch.setTextColor(brown);homeSearch.setHintTextColor(Color.rgb(150,137,116));homeSearch.setHint("Search or enter address…");homeSearch.setPadding(22,0,22,0);homeSearch.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_search,0,0,0);homeSearch.setCompoundDrawablePadding(14);homeSearch.setBackgroundResource(R.drawable.rounded_search);LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,62);sp.topMargin=36;homeLayer.addView(homeSearch,sp);
@@ -34,8 +34,8 @@ public class MainActivity extends Activity{
  void find(){final EditText e=new EditText(this);e.setHint("Find text");new AlertDialog.Builder(this).setTitle("Find in page").setView(e).setPositiveButton("Find",(d,w)->page.find(e.getText().toString())).setNegativeButton("Cancel",null).show();}
  void settings(){new AlertDialog.Builder(this).setTitle("Algerium settings").setItems(new String[]{"Search engine: Google","JavaScript: experimental","Block third-party trackers: on","Clear browsing data"},(d,w)->{if(w==3){history.clear();Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}}).show();}
  void showList(String t,ArrayList<String> a){new AlertDialog.Builder(this).setTitle(t).setItems(a.toArray(new String[0]),(d,w)->navigate(a.get(w))).setPositiveButton("Close",null).show();}
- void home(){current="about:home";address.setText("");homeSearch.setText("");title.setText("Algerium");page.home();}
- void navigate(String raw){navigate(raw,true);}void navigate(String raw,boolean add){String u=normalize(raw);current=u;address.setText(u);title.setText(u.equals("about:home")?"Algerium":u);homeSearch.setVisibility(View.GONE);if(add&&!u.equals("about:home"))history.add(0,u);page.load(u);}
+ void home(){current="about:home";address.setText("");homeSearch.setText("");title.setText("Algerium");homeLayer.setVisibility(View.VISIBLE);page.home();}
+ void navigate(String raw){navigate(raw,true);}void navigate(String raw,boolean add){String u=normalize(raw);current=u;address.setText(u);title.setText(u.equals("about:home")?"Algerium":u);homeLayer.setVisibility(View.GONE);if(add&&!u.equals("about:home"))history.add(0,u);page.load(u);}
  String normalize(String s){s=s.trim();if(s.isEmpty())return "about:home";if(s.equalsIgnoreCase("algerium://home"))return "about:home";if(!s.matches("(?i)^[a-z][a-z0-9+.-]*://.*")){if(s.contains(" "))return "https://www.google.com/search?q="+enc(s);return "https://"+s;}return s;}
  String enc(String s){try{return URLEncoder.encode(s,"UTF-8");}catch(Exception e){return s;}}
 }
