@@ -2,7 +2,7 @@ package dz.algerium.browser;
 
 import android.os.SystemClock;
 import com.whl.quickjs.wrapper.JSCallFunction;
-import com.whl.quickjs.wrapper.JSObject;import com.whl.quickjs.wrapper.QuickJSLoader;
+import com.whl.quickjs.wrapper.JSObject;
 import com.whl.quickjs.wrapper.QuickJSContext;
 import java.io.*;import java.net.*;import java.util.*;import java.util.concurrent.*;
 
