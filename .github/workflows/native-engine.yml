@@ -22,7 +22,7 @@ jobs:
           elif [ "$RUNNER_OS" = "macOS" ]; then
             brew install cmake sdl2 sdl2_ttf curl pkg-config
           else
-            vcpkg install sdl2 sdl2-ttf curl:x64-windows
+            vcpkg install sdl2:x64-windows sdl2-ttf:x64-windows curl:x64-windows
           fi
       - name: Configure engine tests
         run: cmake -S engine -B build-engine -DALGERIUM_ENGINE_TESTS=ON
@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            cmake -S desktop -B build-desktop -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake"
+            cmake -S desktop -B build-desktop -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DVCPKG_TARGET_TRIPLET=x64-windows
           else
             cmake -S desktop -B build-desktop
           fi
