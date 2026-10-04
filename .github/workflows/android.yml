@@ -25,6 +25,19 @@ jobs:
           wget -q https://services.gradle.org/distributions/gradle-8.11.1-bin.zip
           unzip -q gradle-8.11.1-bin.zip -d $HOME/gradle
           echo "$HOME/gradle/gradle-8.11.1/bin" >> $GITHUB_PATH
+      - name: Security source gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -RInE 'android\\.webkit\\.WebView|addJavascriptInterface|Runtime\\.getRuntime|ProcessBuilder|android\\.permission\\.(READ|WRITE)_EXTERNAL_STORAGE|MANAGE_EXTERNAL_STORAGE' app/src/main; then
+            echo "Forbidden browser/security API detected"
+            exit 1
+          fi
+          grep -q 'android:isolatedProcess="true"' app/src/main/AndroidManifest.xml
+          grep -q 'android:exported="false"' app/src/main/AndroidManifest.xml
+          grep -q 'usesCleartextTraffic="false"' app/src/main/AndroidManifest.xml
+          grep -q 'networkSecurityConfig="@xml/network_security_config"' app/src/main/AndroidManifest.xml
+          echo "Security source gate passed"
       - run: gradle testDebugUnitTest --stacktrace
       - run: gradle assembleDebug --stacktrace
       - uses: actions/upload-artifact@v4
