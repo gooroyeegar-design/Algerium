@@ -16,7 +16,11 @@ ComputedStyle compute_style(const std::vector<CssRule>& rules,const std::string&
  struct Pick{int score=-1;std::string v;};std::unordered_map<std::string,Pick> picks;
  auto matches=[&](const std::string& q){if(q=="*")return true;if(q==tag)return true;auto id=attrs.find("id");if(id!=attrs.end()&&q=="#"+id->second)return true;auto cl=attrs.find("class");if(cl!=attrs.end()&&q=="."+cl->second)return true;return false;};
  for(auto&r:rules)if(matches(r.selector))for(auto&d:r.declarations)if(r.specificity>=picks[d.property].score)picks[d.property]={r.specificity,d.value};
- auto inlineStyle=attrs.find("style");if(inlineStyle!=attrs.end()){for(auto&d:parse_css("*{"+inlineStyle->second+"}")[0].declarations)picks[d.property]={1000,d.value};}
+ auto inlineStyle=attrs.find("style");
+ if(inlineStyle!=attrs.end()){
+   auto inlineRules=parse_css("*{"+inlineStyle->second+"}");
+   if(!inlineRules.empty()) for(const auto& d:inlineRules.front().declarations)picks[d.property]={1000,d.value};
+ }
  for(auto&[k,p]:picks){auto v=p.v;if(k=="display")s.display=v;else if(k=="position")s.position=v;else if(k=="color")s.color=v;else if(k=="background"||k=="background-color")s.background=v;else if(k=="font-size")s.font_size=px(v,16);else if(k=="font-weight")s.bold=(v=="bold"||v=="700");else if(k=="width")s.width=px(v,-1);else if(k=="height")s.height=px(v,-1);else if(k=="margin")s.margin_top=s.margin_right=s.margin_bottom=s.margin_left=px(v);else if(k=="padding")s.padding_top=s.padding_right=s.padding_bottom=s.padding_left=px(v);}
  return s;
 }
