@@ -1,0 +1,21 @@
+#include "algerium/security.h"
+#include "algerium/navigation.h"
+#include "algerium/events.h"
+#include <cassert>
+#include <iostream>
+using namespace algerium;
+int main(){
+ assert(same_origin(parse_origin("https://example.com/a"),parse_origin("https://example.com/b")));
+ assert(!same_origin(parse_origin("https://example.com"),parse_origin("http://example.com")));
+ assert(!same_origin(parse_origin("https://example.com"),parse_origin("https://evil.example")));
+ assert(is_safe_navigation("https://example.com"));
+ assert(!is_safe_navigation("javascript:alert(1)"));
+ assert(!is_safe_navigation("https://user:pass@example.com/"));
+ assert(!is_safe_navigation("http://127.0.0.1/"));
+ EventTarget e; bool ran=false, prevented=false;
+ e.add_event_listener("submit",[&](Event& ev){ran=true;ev.prevent_default();});
+ Event ev; e.dispatch_event("submit",ev); prevented=ev.default_prevented;
+ assert(ran&&prevented);
+ SessionHistory h; h.navigate("https://a.example");h.navigate("https://b.example");assert(h.back()=="https://a.example");assert(h.forward()=="https://b.example");
+ std::cout<<"security/navigation regressions passed\n";
+}
