@@ -1,6 +1,8 @@
 #include "algerium/engine.h"
 #include <cctype>
 #include <algorithm>
+#include <cstring>
+#include <unordered_set>
 #include <unordered_set>
 namespace algerium {
 static std::string lower(std::string s){for(char& c:s)c=(char)std::tolower((unsigned char)c);return s;}
