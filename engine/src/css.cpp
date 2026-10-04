@@ -14,7 +14,16 @@ std::vector<CssRule> parse_css(const std::string& css){
 ComputedStyle compute_style(const std::vector<CssRule>& rules,const std::string& tag,const std::unordered_map<std::string,std::string>& attrs,const ComputedStyle* parent){
  ComputedStyle s;if(parent){s.color=parent->color;s.font_family=parent->font_family;s.font_size=parent->font_size;}
  struct Pick{int score=-1;std::string v;};std::unordered_map<std::string,Pick> picks;
- auto matches=[&](const std::string& q){if(q=="*")return true;if(q==tag)return true;auto id=attrs.find("id");if(id!=attrs.end()&&q=="#"+id->second)return true;auto cl=attrs.find("class");if(cl!=attrs.end()&&q=="."+cl->second)return true;return false;};
+ auto matches=[&](const std::string& q){
+ if(q=="*"||q==tag)return true;
+ auto id=attrs.find("id");if(id!=attrs.end()&&q=="#"+id->second)return true;
+ auto cl=attrs.find("class");
+ if(cl!=attrs.end()){
+   std::string wanted=q.size()&&q[0]=='.'?q.substr(1):"";
+   if(!wanted.empty()){std::string classes=cl->second;size_t p=0;while(p<classes.size()){while(p<classes.size()&&std::isspace((unsigned char)classes[p]))p++;size_t e=p;while(e<classes.size()&&!std::isspace((unsigned char)classes[e]))e++;if(classes.substr(p,e-p)==wanted)return true;p=e;}}
+ }
+ return false;
+};
  for(auto&r:rules)if(matches(r.selector))for(auto&d:r.declarations)if(r.specificity>=picks[d.property].score)picks[d.property]={r.specificity,d.value};
  auto inlineStyle=attrs.find("style");
  if(inlineStyle!=attrs.end()){
