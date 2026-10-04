@@ -36,6 +36,12 @@ public final class JsEngine {
         final int id;
         synchronized(lock){
             ensureBoundLocked();
+            long deadline=System.currentTimeMillis()+3000;
+            while(service==null && binding){
+                long left=deadline-System.currentTimeMillis();
+                if(left<=0)break;
+                try{lock.wait(left);}catch(InterruptedException e){Thread.currentThread().interrupt();break;}
+            }
             if(service==null){lastError="Isolated JavaScript service unavailable";return html;}
             id=nextId++;
         }
