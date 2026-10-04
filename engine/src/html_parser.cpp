@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cstring>
 #include <unordered_set>
-#include <unordered_set>
 namespace algerium {
 static std::string lower(std::string s){for(char& c:s)c=(char)std::tolower((unsigned char)c);return s;}
 static std::string trim(std::string s){auto a=s.find_first_not_of(" \t\r\n");auto b=s.find_last_not_of(" \t\r\n");return a==std::string::npos?"":s.substr(a,b-a+1);}
@@ -43,6 +42,4 @@ Document parse_html(const std::string& html,const std::string& url){
   if(name=="title"){std::string title;for(auto&c:raw->children)if(c->type==Node::Type::Text)title+=c->text;d.title=title;}
   if(!self&&!voids.count(name)){stack.push_back(raw);if(name=="script"||name=="style"||name=="textarea"){std::string endtag="</"+name;size_t z=html.find(endtag,p);if(z!=std::string::npos){std::string body=html.substr(p,z-p);if(!body.empty())raw->append(std::make_unique<Node>(Node::Type::Text,"#text"))->text=body;size_t ze=html.find('>',z);p=ze==std::string::npos?html.size():ze+1;stack.pop_back();}}}
  }
- return d;
-}
-}
+ for(Node* n: descendants(d.root.get())){ if(n->name=="title"){ std::string t; for(auto& ch:n->children) if(ch->type==Node::Type::Text) t+=ch->text; d.title=decode_entities(t); break; } }\n return d;\n}\n}
