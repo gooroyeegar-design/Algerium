@@ -1,23 +1,23 @@
 package dz.algerium.browser;
 
-import android.app.*;import android.os.*;import android.graphics.Color;import android.view.*;import android.view.inputmethod.EditorInfo;import android.widget.*;import java.net.*;import java.io.*;
+import android.app.*;import android.os.*;import android.content.*;import android.graphics.Color;import android.net.Uri;import android.view.*;import android.view.inputmethod.EditorInfo;import android.widget.*;import java.net.*;import java.io.*;import java.util.*;
 
-public class MainActivity extends Activity {
- EditText address; PageView page; TextView status; String current="";
- @Override public void onCreate(Bundle b){super.onCreate(b); build(); load("https://www.google.com");}
- void build(){
-  LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setBackgroundColor(Color.WHITE);
-  LinearLayout bar=new LinearLayout(this); bar.setPadding(10,8,10,8); bar.setGravity(Gravity.CENTER_VERTICAL);
-  Button back=btn("‹"), forward=btn("›"), reload=btn("↻"); address=new EditText(this); address.setSingleLine(true); address.setHint("Search or enter address"); address.setImeOptions(EditorInfo.IME_ACTION_GO); address.setInputType(33);
-  bar.addView(back,sz(42));bar.addView(forward,sz(42));bar.addView(reload,sz(42));bar.addView(address,new LinearLayout.LayoutParams(0,50,1));
-  root.addView(bar); status=new TextView(this); status.setText("Algerium");status.setTextSize(12);status.setTextColor(Color.DKGRAY);status.setPadding(14,2,14,2);root.addView(status,new LinearLayout.LayoutParams(-1,30));
+public class MainActivity extends Activity{
+ EditText address; PageView page; TextView title; ArrayList<String> history=new ArrayList<>(),bookmarks=new ArrayList<>(); String current="about:home";
+ @Override public void onCreate(Bundle b){super.onCreate(b); build(); home();}
+ Button b(String s){Button x=new Button(this);x.setText(s);x.setTextSize(18);x.setMinWidth(0);x.setPadding(0,0,0,0);return x;}
+ LinearLayout.LayoutParams p(int w,int h){return new LinearLayout.LayoutParams(w,h);}
+ void build(){LinearLayout root=new LinearLayout(this);root.setOrientation(LinearLayout.VERTICAL);root.setBackgroundColor(Color.WHITE);
+  LinearLayout tabs=new LinearLayout(this);tabs.setGravity(Gravity.CENTER_VERTICAL);title=new TextView(this);title.setText("  Algerium");title.setTextSize(15);title.setTypeface(null,1);tabs.addView(title,new LinearLayout.LayoutParams(0,44,1));Button plus=b("+");tabs.addView(plus,p(48,44));root.addView(tabs);
+  LinearLayout bar=new LinearLayout(this);bar.setPadding(6,4,6,4);Button back=b("‹"),fwd=b("›"),reload=b("↻"),menu=b("⋮");address=new EditText(this);address.setSingleLine();address.setHint("Search or enter address");address.setImeOptions(EditorInfo.IME_ACTION_GO);bar.addView(back,p(40,48));bar.addView(fwd,p(40,48));bar.addView(reload,p(40,48));bar.addView(address,new LinearLayout.LayoutParams(0,48,1));bar.addView(menu,p(40,48));root.addView(bar);
   page=new PageView(this);root.addView(page,new LinearLayout.LayoutParams(-1,0,1));setContentView(root);
-  address.setOnEditorActionListener((v,a,e)->{load(normalize(address.getText().toString()));return true;});
-  reload.setOnClickListener(v->load(current)); back.setOnClickListener(v->{if(page.canBack())page.back();}); forward.setOnClickListener(v->{if(page.canForward())page.forward();});
- }
- Button btn(String s){Button b=new Button(this);b.setText(s);b.setTextSize(22);b.setPadding(0,0,0,0);return b;} LinearLayout.LayoutParams sz(int w){return new LinearLayout.LayoutParams(w,50);}
- String normalize(String s){s=s.trim();if(s.isEmpty())return "https://www.google.com";if(!s.matches("(?i)^[a-z][a-z0-9+.-]*://.*")){if(s.contains(" "))return "https://www.google.com/search?q="+URLEncoder(s);s="https://"+s;}return s;}
+  address.setOnEditorActionListener((v,a,e)->{navigate(address.getText().toString());return true;});reload.setOnClickListener(v->navigate(current));back.setOnClickListener(v->{if(page.canBack()){current=page.backUrl();navigate(current,false);}});fwd.setOnClickListener(v->{if(page.canForward()){current=page.forwardUrl();navigate(current,false);}});plus.setOnClickListener(v->home());menu.setOnClickListener(v->popup(menu));}
+ void popup(View anchor){PopupMenu m=new PopupMenu(this,anchor);m.getMenu().add("New tab");m.getMenu().add("Bookmarks");m.getMenu().add("History");m.getMenu().add("Find in page");m.getMenu().add("Share page");m.getMenu().add("Settings");m.setOnMenuItemClickListener(i->{String s=i.getTitle().toString();if(s.equals("New tab"))home();else if(s.equals("Bookmarks"))showList("Bookmarks",bookmarks);else if(s.equals("History"))showList("History",history);else if(s.equals("Find in page"))find();else if(s.equals("Share page")){Intent x=new Intent(Intent.ACTION_SEND);x.setType("text/plain");x.putExtra(Intent.EXTRA_TEXT,current);startActivity(Intent.createChooser(x,"Share page"));}else if(s.equals("Settings"))settings();return true;});m.show();}
+ void find(){final EditText e=new EditText(this);e.setHint("Find text");new AlertDialog.Builder(this).setTitle("Find in page").setView(e).setPositiveButton("Find",(d,w)->page.find(e.getText().toString())).setNegativeButton("Cancel",null).show();}
+ void settings(){new AlertDialog.Builder(this).setTitle("Algerium settings").setItems(new String[]{"Search engine: Google","JavaScript: experimental","Block third-party trackers: on","Clear browsing data"},(d,w)->{if(w==3){history.clear();Toast.makeText(this,"Browsing data cleared",Toast.LENGTH_SHORT).show();}}).show();}
+ void showList(String t,ArrayList<String> a){new AlertDialog.Builder(this).setTitle(t).setItems(a.toArray(new String[0]),(d,w)->navigate(a.get(w))).setPositiveButton("Close",null).show();}
+ void home(){current="about:home";address.setText("");page.home();title.setText("  Algerium");}
+ void navigate(String raw){navigate(raw,true);} void navigate(String raw,boolean add){String u=normalize(raw);current=u;address.setText(u);title.setText("  "+u);if(add&&!u.equals("about:home"))history.add(0,u);page.load(u);}
+ String normalize(String s){s=s.trim();if(s.isEmpty())return "about:home";if(s.equalsIgnoreCase("algerium://home"))return "about:home";if(!s.matches("(?i)^[a-z][a-z0-9+.-]*://.*")){if(s.contains(" "))return "https://www.google.com/search?q="+URLEncoder(s);return "https://"+s;}return s;}
  String URLEncoder(String s){try{return java.net.URLEncoder.encode(s,"UTF-8");}catch(Exception e){return s;}}
- void load(String url){current=url;address.setText(url);status.setText("Loading…");new Thread(()->{try{HttpURLConnection c=(HttpURLConnection)new URL(url).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(20000);c.setRequestProperty("User-Agent","Algerium/0.1");int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String html=read(in);String base=c.getURL().toString();runOnUiThread(()->{status.setText(code+"  "+base);page.showDocument(base,html);});}catch(Exception e){runOnUiThread(()->{status.setText("Could not load page");page.showError(current,e.getMessage());});}}).start();}
- String read(InputStream in)throws Exception{if(in==null)return "";BufferedReader r=new BufferedReader(new InputStreamReader(in,"UTF-8"));StringBuilder s=new StringBuilder();String x;while((x=r.readLine())!=null)s.append(x).append('\n');return s.toString();}
 }
