@@ -1,22 +1,159 @@
 package dz.algerium.browser;
 
-import android.content.*;import android.graphics.*;import android.view.*;import android.widget.*;import java.io.*;import java.net.*;import java.util.*;import java.util.regex.*;
+import android.content.*;
+import android.graphics.*;
+import android.view.*;
+import android.widget.*;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.regex.*;
 
-public class PageView extends View{
- Paint p=new Paint(3);String url="",html="";ArrayList<String> stack=new ArrayList<>();int pos=-1;float scroll=0,sy;ArrayList<Block> blocks=new ArrayList<>();String query="";
- static class Block{String text;float x,y,w;int size;boolean bold;Block(String t,float X,float Y,float W,int S,boolean B){text=t;x=X;y=Y;w=W;size=S;bold=B;}}
- public PageView(Context c){super(c);p.setTypeface(Typeface.create("sans",0));setBackgroundColor(Color.WHITE);setFocusable(true);}
- void home(){blocks.clear();scroll=0;setBackgroundColor(Color.rgb(243,232,210));invalidate();}
- void load(String u){if(u.equals("about:home")){home();return;}new Thread(()->{try{HttpURLConnection c=(HttpURLConnection)new URL(u).openConnection();c.setInstanceFollowRedirects(true);c.setConnectTimeout(12000);c.setReadTimeout(20000);c.setRequestProperty("User-Agent","Algerium/0.2");int code=c.getResponseCode();InputStream in=code>=400?c.getErrorStream():c.getInputStream();String h=read(in);String finalUrl=c.getURL().toString();String rendered=JsEngine.get().run(h,finalUrl);post(()->{url=finalUrl;html=rendered;push(finalUrl);parse();invalidate();});}catch(Exception e){post(()->error(u,e.toString()));}}).start();}
- void push(String u){if(pos>=0&&pos<stack.size()-1)stack.subList(pos+1,stack.size()).clear();if(pos<0||!stack.get(pos).equals(u)){stack.add(u);pos=stack.size()-1;}}
- String read(InputStream in)throws Exception{if(in==null)return "";BufferedReader r=new BufferedReader(new InputStreamReader(in,"UTF-8"));StringBuilder s=new StringBuilder();String x;while((x=r.readLine())!=null)s.append(x).append('\n');return s.toString();}
- void parse(){setBackgroundColor(Color.rgb(255,249,238));blocks.clear();scroll=0;String s=html.replaceAll("(?is)<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<!--.*?-->","");s=s.replaceAll("(?is)<(br|hr)\\s*/?>","\\n");s=s.replaceAll("(?is)</(p|div|section|article|h[1-6]|li|tr|header|footer|main|nav|title|form|pre)>","\\n\\n");s=s.replaceAll("(?is)<li[^>]*>","• ");s=s.replaceAll("(?is)<[^>]+>","");s=decode(s).replaceAll("[ \\t]+"," ").replaceAll("\\n{3,}","\\n\\n").trim();float y=30;for(String para:s.split("\\n+")){String t=para.trim();if(t.isEmpty())continue;boolean head=t.length()<65;int size=head?22:17;float w=Math.max(200,getWidth()-32);while(!t.isEmpty()){int n=Math.min(t.length(),Math.max(10,(int)(w/(size*.52f))));int cut=n;if(n<t.length()){int k=t.lastIndexOf(' ',n);if(k>4)cut=k;}String part=t.substring(0,cut).trim();t=t.substring(cut).trim();blocks.add(new Block(part,16,y,w,size,head));y+=size*1.55f;}}if(blocks.isEmpty())blocks.add(new Block("No readable text was found on this page.",16,40,getWidth()-32,18,false));}
- String decode(String s){return s.replace("&nbsp;"," ").replace("&amp;","&").replace("&lt;","<").replace("&gt;",">").replace("&quot;","\"").replace("&#39;","'");}
- @Override protected void onDraw(Canvas c){super.onDraw(c);c.save();c.translate(0,-scroll);p.setColor(Color.rgb(25,25,28));float y;for(Block b:blocks){p.setTextSize(b.size);p.setTypeface(Typeface.create("sans",b.bold?Typeface.BOLD:Typeface.NORMAL));ArrayList<String> lines=wrap(b.text,b.w);y=b.y;for(String line:lines){c.drawText(line,b.x,y,p);y+=b.size*1.5f;}}c.restore();}
- ArrayList<String> wrap(String s,float w){ArrayList<String>a=new ArrayList<>();String line="";for(String q:s.split(" ")){String z=line.isEmpty()?q:line+" "+q;if(p.measureText(z)>w&&!line.isEmpty()){a.add(line);line=q;}else line=z;}if(!line.isEmpty())a.add(line);return a;}
- @Override public boolean onTouchEvent(MotionEvent e){if(e.getAction()==0){sy=e.getY();return true;}if(e.getAction()==2){float d=sy-e.getY();scroll=Math.max(0,Math.min(Math.max(0,contentHeight()-getHeight()+30),scroll+d));sy=e.getY();invalidate();return true;}return true;}
- int contentHeight(){return blocks.isEmpty()?0:(int)(blocks.get(blocks.size()-1).y+100);}
- boolean canBack(){return pos>0;}boolean canForward(){return pos>=0&&pos<stack.size()-1;}String backUrl(){if(pos>0){pos--;return stack.get(pos);}return "about:home";}String forwardUrl(){if(canForward()){pos++;return stack.get(pos);}return "about:home";}
- void find(String q){query=q.toLowerCase();for(int i=0;i<blocks.size();i++)if(blocks.get(i).text.toLowerCase().contains(query)){scroll=Math.max(0,blocks.get(i).y-80);invalidate();Toast.makeText(getContext(),"Found",Toast.LENGTH_SHORT).show();return;}Toast.makeText(getContext(),"Not found",Toast.LENGTH_SHORT).show();}
- void error(String u,String e){blocks.clear();blocks.add(new Block("Algerium couldn't load this page",20,60,getWidth()-40,25,true));blocks.add(new Block(u,20,110,getWidth()-40,16,false));blocks.add(new Block("Network error",20,155,getWidth()-40,17,false));invalidate();}
+public class PageView extends View {
+    Paint p = new Paint(3);
+    String url="", html="";
+    ArrayList<String> stack=new ArrayList<>();
+    int pos=-1;
+    float scroll=0, sy;
+    ArrayList<Block> blocks=new ArrayList<>();
+    String query="";
+    private NavigationListener navigationListener;
+
+    public interface NavigationListener { void open(String url); }
+    static class Block {
+        String text; float x,y,w; int size; boolean bold;
+        Block(String t,float X,float Y,float W,int S,boolean B){text=t;x=X;y=Y;w=W;size=S;bold=B;}
+    }
+
+    public PageView(Context c){
+        super(c);
+        p.setTypeface(Typeface.create("sans",0));
+        setBackgroundColor(Color.WHITE);
+        setFocusable(true);
+    }
+
+    public void setNavigationListener(NavigationListener l){navigationListener=l;}
+
+    void home(){blocks.clear();scroll=0;setBackgroundColor(Color.rgb(243,232,210));invalidate();}
+
+    void load(String u){
+        if(u.equals("about:home")){home();return;}
+        if(!BrowserPolicy.isHttpUrl(u)){error(u,"Blocked URL scheme");return;}
+        new Thread(()->{
+            try{
+                HttpURLConnection c=(HttpURLConnection)new URL(u).openConnection();
+                c.setInstanceFollowRedirects(true);
+                c.setConnectTimeout(12000);
+                c.setReadTimeout(20000);
+                c.setRequestProperty("User-Agent","Algerium/1.0");
+                c.setRequestProperty("Accept","text/html,application/xhtml+xml,text/plain,*/*");
+                int code=c.getResponseCode();
+                InputStream in=code>=400?c.getErrorStream():c.getInputStream();
+                String h=BrowserPolicy.readLimited(in,BrowserPolicy.pageLimit());
+                String finalUrl=c.getURL().toString();
+                String rendered=JsEngine.get().run(h,finalUrl);
+                post(()->{
+                    url=finalUrl;html=rendered;push(finalUrl);parse();invalidate();
+                });
+            }catch(Exception e){post(()->error(u,e.toString()));}
+        }).start();
+    }
+
+    void push(String u){
+        if(pos>=0&&pos<stack.size()-1)stack.subList(pos+1,stack.size()).clear();
+        if(pos<0||!stack.get(pos).equals(u)){stack.add(u);pos=stack.size()-1;}
+    }
+
+    void parse(){
+        setBackgroundColor(Color.rgb(255,249,238));
+        blocks.clear();scroll=0;
+        String s=html.replaceAll("(?is)<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<!--.*?-->","");
+        s=s.replaceAll("(?is)<(br|hr)\\s*/?>","\\n");
+        s=s.replaceAll("(?is)</(p|div|section|article|h[1-6]|li|tr|header|footer|main|nav|title|form|pre|table|blockquote)>","\\n\\n");
+        s=s.replaceAll("(?is)<li[^>]*>","• ");
+        s=s.replaceAll("(?is)<[^>]+>","");
+        s=decode(s).replaceAll("[ \\t]+"," ").replaceAll("\\n{3,}","\\n\\n").trim();
+
+        float y=30;
+        for(String para:s.split("\\n+")){
+            String t=para.trim();
+            if(t.isEmpty())continue;
+            boolean head=t.length()<65;
+            int size=head?22:17;
+            float w=Math.max(200,getWidth()-32);
+            while(!t.isEmpty()){
+                int n=Math.min(t.length(),Math.max(10,(int)(w/(size*.52f))));
+                int cut=n;
+                if(n<t.length()){int k=t.lastIndexOf(' ',n);if(k>4)cut=k;}
+                String part=t.substring(0,cut).trim();
+                t=t.substring(cut).trim();
+                blocks.add(new Block(part,16,y,w,size,head));
+                y+=size*1.55f;
+            }
+        }
+        if(blocks.isEmpty())blocks.add(new Block("No readable text was found on this page.",16,40,getWidth()-32,18,false));
+    }
+
+    String decode(String s){
+        return s.replace("&nbsp;"," ").replace("&amp;","&").replace("&lt;","<")
+                .replace("&gt;",">").replace("&quot;","\"").replace("&#39;","'");
+    }
+
+    @Override protected void onDraw(Canvas c){
+        super.onDraw(c);
+        c.save();c.translate(0,-scroll);
+        p.setColor(Color.rgb(25,25,28));
+        float y;
+        for(Block b:blocks){
+            p.setTextSize(b.size);
+            p.setTypeface(Typeface.create("sans",b.bold?Typeface.BOLD:Typeface.NORMAL));
+            ArrayList<String> lines=wrap(b.text,b.w);
+            y=b.y;
+            for(String line:lines){c.drawText(line,b.x,y,p);y+=b.size*1.5f;}
+        }
+        c.restore();
+    }
+
+    ArrayList<String> wrap(String s,float w){
+        ArrayList<String>a=new ArrayList<>();String line="";
+        for(String q:s.split(" ")){
+            String z=line.isEmpty()?q:line+" "+q;
+            if(p.measureText(z)>w&&!line.isEmpty()){a.add(line);line=q;}else line=z;
+        }
+        if(!line.isEmpty())a.add(line);
+        return a;
+    }
+
+    @Override public boolean onTouchEvent(MotionEvent e){
+        if(e.getAction()==0){sy=e.getY();return true;}
+        if(e.getAction()==2){
+            float d=sy-e.getY();
+            scroll=Math.max(0,Math.min(Math.max(0,contentHeight()-getHeight()+30),scroll+d));
+            sy=e.getY();invalidate();return true;
+        }
+        return true;
+    }
+
+    int contentHeight(){return blocks.isEmpty()?0:(int)(blocks.get(blocks.size()-1).y+100);}
+    boolean canBack(){return pos>0;}
+    boolean canForward(){return pos>=0&&pos<stack.size()-1;}
+    String backUrl(){if(pos>0){pos--;return stack.get(pos);}return "about:home";}
+    String forwardUrl(){if(canForward()){pos++;return stack.get(pos);}return "about:home";}
+
+    void find(String q){
+        query=q.toLowerCase();
+        for(int i=0;i<blocks.size();i++)if(blocks.get(i).text.toLowerCase().contains(query)){
+            scroll=Math.max(0,blocks.get(i).y-80);invalidate();
+            Toast.makeText(getContext(),"Found",Toast.LENGTH_SHORT).show();return;
+        }
+        Toast.makeText(getContext(),"Not found",Toast.LENGTH_SHORT).show();
+    }
+
+    void error(String u,String e){
+        blocks.clear();
+        blocks.add(new Block("Algerium couldn't load this page",20,60,getWidth()-40,25,true));
+        blocks.add(new Block(u,20,110,getWidth()-40,16,false));
+        blocks.add(new Block(e,20,155,getWidth()-40,15,false));
+        invalidate();
+    }
 }
