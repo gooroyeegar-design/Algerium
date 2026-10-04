@@ -21,7 +21,7 @@ public class MainActivity extends Activity{
   super.onCreate(b);
   getWindow().setStatusBarColor(beige);getWindow().setNavigationBarColor(beige);
   getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-  prefs=getSharedPreferences("algerium_private",MODE_PRIVATE);loadLists();build();home();
+  prefs=getSharedPreferences("algerium_private",MODE_PRIVATE);JsEngine.get().init(this);loadLists();build();home();
  }
 
  TextView tv(String s,float z){TextView x=new TextView(this);x.setText(s);x.setTextSize(z);x.setTextColor(brown);x.setGravity(Gravity.CENTER);return x;}
