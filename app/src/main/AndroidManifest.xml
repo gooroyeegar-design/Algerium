@@ -10,6 +10,7 @@
    android:fullBackupContent="false"
    android:dataExtractionRules="@xml/data_extraction_rules"
    android:resizeableActivity="true">
+  <service android:name=".JsSandboxService" android:exported="false" android:isolatedProcess="true" android:stopWithTask="true"/>
   <activity android:name=".MainActivity" android:screenOrientation="portrait" android:exported="true">
    <intent-filter>
     <action android:name="android.intent.action.MAIN"/>
