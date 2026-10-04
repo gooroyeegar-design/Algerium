@@ -1,0 +1,5 @@
+plugins { id 'com.android.application' }
+
+android { namespace 'dz.algerium.browser'; compileSdk 35
+    defaultConfig { applicationId 'dz.algerium.browser'; minSdk 23; targetSdk 35; versionCode 1; versionName '0.1.0' }
+}
