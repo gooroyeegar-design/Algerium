@@ -121,8 +121,8 @@ public class MainActivity extends Activity{
   if(b!=null&&!b.isEmpty())for(String s:b.split("\\n"))if(BrowserPolicy.isHttpUrl(s))bookmarks.add(s);
  }
  void saveLists(){
-  StringBuilder h=new StringBuilder();for(String s:history){if(h.length()>0)h.append('\\n');h.append(s.replace("\\n",""));}
-  StringBuilder b=new StringBuilder();for(String s:bookmarks){if(b.length()>0)b.append('\\n');b.append(s.replace("\\n",""));}
+  StringBuilder h=new StringBuilder();for(String s:history){if(h.length()>0)h.append('\n');h.append(s.replace("\\n",""));}
+  StringBuilder b=new StringBuilder();for(String s:bookmarks){if(b.length()>0)b.append('\n');b.append(s.replace("\\n",""));}
   prefs.edit().putString("history",h.toString()).putString("bookmarks",b.toString()).apply();
  }
  @Override protected void onPause(){super.onPause();saveLists();}
