@@ -40,12 +40,8 @@ public final class JsRuntimeCore {
                 String src = attr(attrs, "src");
                 try {
                     if (src != null && !src.isEmpty()) {
-                        if (!BrowserPolicy.isSafeScriptUrl(baseUrl, src)) {
-                            lastError = "Blocked script URL";
-                            continue;
-                        }
-                        code = fetchText(BrowserPolicy.resolveHttp(baseUrl, src),
-                                BrowserPolicy.scriptLimit(), false);
+                        lastError = "External script was not inlined by the browser process";
+                        continue;
                     }
                     if (code == null || code.trim().isEmpty()) continue;
                     if (code.length() > BrowserPolicy.scriptLimit()) {
