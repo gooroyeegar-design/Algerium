@@ -11,6 +11,8 @@ add_library(algerium_engine STATIC
     src/security.cpp
     src/events.cpp
     src/navigation.cpp
+    src/render.cpp
+    src/resources.cpp
 )
 target_include_directories(algerium_engine PUBLIC include)
 if(MSVC)
