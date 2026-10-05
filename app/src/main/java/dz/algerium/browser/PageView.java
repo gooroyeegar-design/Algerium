@@ -51,7 +51,8 @@ public class PageView extends View {
                 InputStream in=code>=400?c.getErrorStream():c.getInputStream();
                 String h=BrowserPolicy.readLimited(in,BrowserPolicy.pageLimit());
                 String finalUrl=c.getURL().toString();
-                String rendered=JsEngine.get().run(h,finalUrl);
+                String rendered=isSearchPage(finalUrl)?h:JsEngine.get().run(h,finalUrl);
+                rendered=stripNonRenderableScripts(rendered);
                 post(()->{
                     url=finalUrl;html=rendered;push(finalUrl);parse();invalidate();
                 });
@@ -64,11 +65,15 @@ public class PageView extends View {
         if(pos<0||!stack.get(pos).equals(u)){stack.add(u);pos=stack.size()-1;}
     }
 
+    boolean isSearchPage(String u){ try{URI x=new URI(u);String h=x.getHost()==null?"":x.getHost().toLowerCase(Locale.US);return h.equals("google.com")||h.endsWith(".google.com");}catch(Exception e){return false;} }
+    String stripNonRenderableScripts(String s){if(s==null)return "";return s.replaceAll("(?is)<script\\b[^>]*>.*?</script>","").replaceAll("(?is)<noscript\\b[^>]*>.*?</noscript>","").replaceAll("(?is)<template\\b[^>]*>.*?</template>","");}
+
     void parse(){
         setBackgroundColor(Color.rgb(255,249,238));
         blocks.clear();scroll=0;
         try {
-            String rendered=NativeEngine.render(html,url,Math.max(320,getWidth()));
+            String cleaned=stripNonRenderableScripts(html);
+            String rendered=NativeEngine.render(cleaned,url,Math.max(320,getWidth()));
             for(String line:rendered.split("\\n")){
                 if(line.trim().isEmpty()) continue;
                 String[] q=line.split("\\t",-1); if(q.length<8) continue;
@@ -104,7 +109,9 @@ public class PageView extends View {
 
     @Override protected void onDraw(Canvas c){
         super.onDraw(c); c.save(); c.translate(0,-scroll);
+        p.setSubpixelText(true);
         for(Block b:blocks){
+            if(b.y+b.h<scroll-80 || b.y>scroll+getHeight()+80) continue;
             if(b.type==0){p.setColor(b.color);c.drawRect(b.x,b.y,b.x+b.w,b.y+b.h,p);continue;}
             if(b.type==2){p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(Math.max(1,b.size));p.setColor(b.color);c.drawRect(b.x,b.y,b.x+b.w,b.y+b.h,p);p.setStyle(Paint.Style.FILL);continue;}
             p.setColor(b.color);p.setTextSize(b.size);p.setTypeface(Typeface.create("sans",b.bold?Typeface.BOLD:Typeface.NORMAL));
@@ -128,6 +135,7 @@ public class PageView extends View {
         if(e.getAction()==0){sy=e.getY();return true;}
         if(e.getAction()==2){
             float d=sy-e.getY();
+            if(Math.abs(d)<0.5f) return true;
             scroll=Math.max(0,Math.min(Math.max(0,contentHeight()-getHeight()+30),scroll+d));
             sy=e.getY();invalidate();return true;
         }
@@ -148,6 +156,8 @@ public class PageView extends View {
         }
         Toast.makeText(getContext(),"Not found",Toast.LENGTH_SHORT).show();
     }
+
+    @Override public boolean onGenericMotionEvent(MotionEvent e){if((e.getSource()&InputDevice.SOURCE_CLASS_POINTER)!=0&&e.getAction()==MotionEvent.ACTION_SCROLL){float d=-e.getAxisValue(MotionEvent.AXIS_VSCROLL)*48f;scroll=Math.max(0,Math.min(Math.max(0,contentHeight()-getHeight()+30),scroll+d));invalidate();return true;}return super.onGenericMotionEvent(e);}
 
     void error(String u,String e){
         blocks.clear();
