@@ -24,7 +24,7 @@ static bool simple_match(const std::string&q,const std::string&tag,const std::un
    if(k=='#'&&a.find("id")==a.end()||k=='#'&&a.at("id")!=v)return false;
    if(k=='.'){auto it=a.find("class");if(it==a.end()||it->second.find(v)==std::string::npos)return false;}p=e;continue;
   }
-  if(q[p]=='['){auto e=q.find(']',p);if(e==std::string::npos)return false;auto x=q.substr(p+1,e-p-1);auto eq=x.find('=');auto k=eq==std::string::npos?x:x.substr(0,eq);auto it=a.find(k);if(it==a.end())return false;if(eq!=std::string::npos){auto v=x.substr(eq+1);if(v.size()>=2&&((v.front()=='\"'&&v.back()=='\"')||(v.front()=='\\''&&v.back()=='\\'')))v=v.substr(1,v.size()-2);if(it->second!=v)return false;}p=e+1;continue;}
+  if(q[p]=='['){auto e=q.find(']',p);if(e==std::string::npos)return false;auto x=q.substr(p+1,e-p-1);auto eq=x.find('=');auto k=eq==std::string::npos?x:x.substr(0,eq);auto it=a.find(k);if(it==a.end())return false;if(eq!=std::string::npos){auto v=x.substr(eq+1);if(v.size()>=2 && (v.front()=='"' || v.front()=='\\'')){char z=v.front();if(v.back()==z)v=v.substr(1,v.size()-2);}if(it->second!=v)return false;}p=e+1;continue;}
   auto e=p;while(e<q.size()&&q[e]!='.'&&q[e]!='#'&&q[e]!='[')++e;auto t=q.substr(p,e-p);if(t!="*"&&t!=tag)return false;p=e;
  }return true;
 }
