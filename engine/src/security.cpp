@@ -22,5 +22,5 @@ bool is_private_host(const std::string&raw){
  return false;
 }
 bool is_potentially_trustworthy(const std::string&url){auto o=parse_origin(url);return !o.opaque&&(o.scheme=="https"||o.host=="localhost"||o.host=="127.0.0.1"||o.host=="::1");}
-bool is_safe_navigation(const std::string&url){auto o=parse_origin(url);if(o.opaque||o.host.empty())return false;if(o.scheme!="http"&&o.scheme!="https")return false;return url.find('\n')==std::string::npos&&url.find('\r')==std::string::npos&&url.find('@')==std::string::npos;}
+bool is_safe_navigation(const std::string&url){auto o=parse_origin(url);if(o.opaque||o.host.empty())return false;if(o.scheme!="http"&&o.scheme!="https")return false;if(is_private_host(o.host))return false;return url.find('\n')==std::string::npos&&url.find('\r')==std::string::npos&&url.find('@')==std::string::npos;}
 }
