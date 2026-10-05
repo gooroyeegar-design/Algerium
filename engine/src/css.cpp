@@ -43,7 +43,7 @@ ComputedStyle compute_style(const std::vector<CssRule>&rules,const std::string&t
   else if(k=="margin")split4(v,s.margin_top,s.margin_right,s.margin_bottom,s.margin_left);
   else if(k=="padding")split4(v,s.padding_top,s.padding_right,s.padding_bottom,s.padding_left);
   else if(k=="line-height")s.line_height=(v.find("px")!=std::string::npos)?px(v,19.2f):px(v,1.2f);
-  else if(k=="gap")s.gap=px(v);else if(k=="row-gap")s.gap=px(v);else if(k=="flex-direction")s.flex_direction=lower(v);
+  else if(k=="gap")s.gap=px(v);else if(k=="row-gap")s.gap=px(v);else if(k=="flex-direction")s.flex_direction=lower(v);\n  else if(k=="justify-content")s.justify_content=lower(v);else if(k=="align-items")s.align_items=lower(v);else if(k=="overflow")s.overflow=lower(v);\n  else if(k=="min-width")s.min_width=px(v);else if(k=="max-width")s.max_width=px(v,-1);else if(k=="min-height")s.min_height=px(v);else if(k=="max-height")s.max_height=px(v,-1);\n  else if(k=="flex-grow")s.flex_grow=px(v);else if(k=="flex-shrink")s.flex_shrink=px(v,1);else if(k=="flex-basis")s.flex_basis=px(v,-1);\n  else if(k=="opacity")s.opacity=px(v,1);else if(k=="letter-spacing")s.letter_spacing=px(v);else if(k=="word-spacing")s.word_spacing=px(v);
   else if(k=="text-align")s.text_align=lower(v);else if(k=="border-width")s.border_width=px(v);else if(k=="border-radius")s.border_radius=px(v);
  }return s;
 }
