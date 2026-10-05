@@ -3,7 +3,7 @@
 #include <cctype>
 #include <sstream>
 namespace algerium {
-static std::string trim(std::string s){auto a=s.find_first_not_of(" \t\r
+static std::string trim(std::string s){auto a=s.find_first_not_of(" \t\r\n");auto b=s.find_last_not_of(" \t\r\n");return a==std::string::npos?"":s.substr(a,b-a+1);}
 ");auto b=s.find_last_not_of(" \t\r
 ");return a==std::string::npos?"":s.substr(a,b-a+1);}
 static std::string lower(std::string s){for(char&c:s)c=(char)std::tolower((unsigned char)c);return s;}
