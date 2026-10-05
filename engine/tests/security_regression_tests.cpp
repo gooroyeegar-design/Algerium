@@ -12,6 +12,7 @@ int main(){
  assert(!is_safe_navigation("javascript:alert(1)"));
  assert(!is_safe_navigation("https://user:pass@example.com/"));
  assert(!is_safe_navigation("http://127.0.0.1/"));
+ assert(is_private_host("192.168.1.1")); assert(is_private_host("::1")); assert(is_private_host("fd00::1")); assert(!is_private_host("8.8.8.8"));
  EventTarget e; bool ran=false, prevented=false;
  e.add_event_listener("submit",[&](Event& ev){ran=true;ev.prevent_default();});
  Event ev; e.dispatch_event("submit",ev); prevented=ev.default_prevented;
