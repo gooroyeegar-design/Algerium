@@ -10,7 +10,7 @@ Origin parse_origin(const std::string&url){
  if(authority.empty()||authority.find('@')!=std::string::npos){o.opaque=true;return o;}
  if(authority[0]=='['){size_t close=authority.find(']');if(close==std::string::npos){o.opaque=true;return o;}o.host=lower(authority.substr(1,close-1));if(close+1<authority.size()){if(authority[close+1]!=':'){o.opaque=true;return o;}o.port=authority.substr(close+2);}}
  else{size_t colon=authority.rfind(':');if(colon!=std::string::npos&&authority.find(':')==colon){o.host=lower(authority.substr(0,colon));o.port=authority.substr(colon+1);}else{o.host=lower(authority);}}
- if(o.host.empty()){o.opaque=true;return o;} if(!o.port.empty()&&!std::all_of(o.port.begin(),o.port.end(),[](unsigned char c){return std::isdigit(c); })){o.opaque=true;return o;} if(o.port.empty())o.port=(o.scheme=="https"?"443":o.scheme=="http"?"80":"");
+ if(o.host.empty()){o.opaque=true;return o;} if(!o.port.empty()&&!std::all_of(o.port.begin(),o.port.end(),[](unsigned char c){return std::isdigit(c); })){o.opaque=true;return o;} if(!o.port.empty()){try{unsigned long pn=std::stoul(o.port);if(pn>65535){o.opaque=true;return o;}}catch(...){o.opaque=true;return o;}} if(o.port.empty())o.port=(o.scheme=="https"?"443":o.scheme=="http"?"80":"");
  if(o.scheme!="http"&&o.scheme!="https")o.opaque=true;return o;
 }
 bool same_origin(const Origin&a,const Origin&b){return !a.opaque&&!b.opaque&&a.scheme==b.scheme&&a.host==b.host&&a.port==b.port;}
