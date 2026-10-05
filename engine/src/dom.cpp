@@ -1,4 +1,3 @@
-static bool matches_simple(const Node*n,const std::string&s){if(!n||n->type!=Node::Type::Element)return false; std::string q=s; auto p=q.find("#"); if(p!=std::string::npos && n->attr("id")!=q.substr(p+1)) return false; p=q.find("."); if(p!=std::string::npos){auto cls=n->attr("class"); if(cls.find(q.substr(p+1))==std::string::npos)return false;} auto b=q.find("["); if(b!=std::string::npos){auto e=q.find("]",b); if(e!=std::string::npos && !n->has(q.substr(b+1,e-b-1)))return false;} if(q[0]!='#'&&q[0]!='.'&&q[0]!='['&&n->name!=q)return false; return true;}
 #include "algerium/dom.h"
 #include <algorithm>
 #include <cctype>
