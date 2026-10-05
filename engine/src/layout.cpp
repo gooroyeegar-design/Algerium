@@ -12,7 +12,7 @@ std::vector<LayoutBox> layout_document(const Document&doc,const std::vector<CssR
  std::function<float(const Node*,float,float,float,const ComputedStyle*)>lay=
  [&](const Node*n,float x,float y,float available,const ComputedStyle*parent)->float{
   if(!n||n->type!=Node::Type::Element)return 0;ComputedStyle s=compute_style(rules,n->name,n->attrs,parent);if(s.display=="none")return 0;
-  float marginW=s.margin_left+s.margin_right,padW=s.padding_left+s.padding_right,w=s.width>0?s.width:std::max(0.f,available-marginW);float contentW=std::max(1.f,w-padW);
+  float marginW=s.margin_left+s.margin_right,padW=s.padding_left+s.padding_right,w=s.width>0?s.width:std::max(0.f,available-marginW);float contentW=std::max(1.f,w-padW);\n  if(s.min_width>0) w=std::max(w,s.min_width); if(s.max_width>=0) w=std::min(w,s.max_width);\n  if(s.min_height>0) h=std::max(h,s.min_height); if(s.max_height>=0) h=std::min(h,s.max_height);
   float contentX=x+s.margin_left+s.padding_left,contentY=y+s.margin_top+s.padding_top,h=s.height>0?s.height:0;
   if(h<=0&&(n->name=="img"||n->name=="video"||n->name=="canvas"))h=150;
   if(h<=0&&!blockish(n->name,s))h=text_height(n,s,contentW)+s.padding_top+s.padding_bottom;
@@ -23,7 +23,7 @@ std::vector<LayoutBox> layout_document(const Document&doc,const std::vector<CssR
   if(s.display=="flex"){
    bool row=s.flex_direction!="column";float gap=s.gap;
    if(row){
-    float each=children.empty()?0:std::max(1.f,(contentW-gap*std::max(0,(int)children.size()-1))/children.size());float cursorX=contentX;
+    float free=std::max(0.f,contentW-gap*std::max(0,(int)children.size()-1)); float grow=0; for(auto*c:children){auto cs=compute_style(rules,c->name,c->attrs,&s);grow+=cs.flex_grow;} float each=children.empty()?0:std::max(1.f,free/std::max<size_t>(1,children.size()));float cursorX=contentX;
     for(auto*c:children){size_t before=out.size();float used=lay(c,cursorX,contentY,each,&s);float childW=each;if(out.size()>before)childW=out[before].width;cursorX+=childW+gap;maxBottom=std::max(maxBottom,contentY+used);}
    }else{
     for(auto*c:children){float used=lay(c,contentX,cursorY,contentW,&s);cursorY+=used+gap;maxBottom=std::max(maxBottom,cursorY);}
