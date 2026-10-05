@@ -2,16 +2,16 @@
 #include <SDL_ttf.h>
 #include <curl/curl.h>
 #include "algerium/engine.h"
+#include "algerium/cookies.h"
 #include <string>
 #include <algorithm>
-#include <cctype>
-static size_t write_cb(char* p,size_t s,size_t n,void* u){auto*out=(std::string*)u;size_t z=s*n;if(out->size()+z>8*1024*1024)return 0;out->append(p,z);return z;}
-static bool fetch_page(const std::string& url,std::string& out){
+#include <cctype>\n#include <ctime>
+struct NetState { std::string body; std::string set_cookie; };\nstatic size_t write_cb(char* p,size_t s,size_t n,void* u){auto*out=(std::string*)u;size_t z=s*n;if(out->size()+z>8*1024*1024)return 0;out->append(p,z);return z;}\nstatic size_t header_cb(char* p,size_t s,size_t n,void* u){auto*st=(NetState*)u;size_t z=s*n;std::string h(p,z);if(h.rfind("Set-Cookie:",0)==0||h.rfind("set-cookie:",0)==0)st->set_cookie+=h.substr(h.find(":")+1);return z;}\nstatic bool fetch_page(const std::string& url,std::string& out,CookieJar& jar,long long now){
  CURL* c=curl_easy_init();if(!c)return false;
  curl_easy_setopt(c,CURLOPT_URL,url.c_str());curl_easy_setopt(c,CURLOPT_FOLLOWLOCATION,1L);curl_easy_setopt(c,CURLOPT_MAXREDIRS,8L);
- curl_easy_setopt(c,CURLOPT_WRITEFUNCTION,write_cb);curl_easy_setopt(c,CURLOPT_WRITEDATA,&out);curl_easy_setopt(c,CURLOPT_USERAGENT,"Algerium/0.3");
+ NetState st; curl_easy_setopt(c,CURLOPT_WRITEFUNCTION,write_cb);curl_easy_setopt(c,CURLOPT_WRITEDATA,&out);curl_easy_setopt(c,CURLOPT_HEADERFUNCTION,header_cb);curl_easy_setopt(c,CURLOPT_HEADERDATA,&st);std::string cookies=jar.cookie_header(url,now);if(!cookies.empty())curl_easy_setopt(c,CURLOPT_COOKIE,cookies.c_str());curl_easy_setopt(c,CURLOPT_USERAGENT,"Algerium/0.3");
  curl_easy_setopt(c,CURLOPT_PROTOCOLS_STR,"http,https");curl_easy_setopt(c,CURLOPT_REDIR_PROTOCOLS_STR,"http,https");curl_easy_setopt(c,CURLOPT_TIMEOUT,20L);curl_easy_setopt(c,CURLOPT_CONNECTTIMEOUT,8L);curl_easy_setopt(c,CURLOPT_NOSIGNAL,1L);curl_easy_setopt(c,CURLOPT_SSL_VERIFYPEER,1L);curl_easy_setopt(c,CURLOPT_SSL_VERIFYHOST,2L);
- return curl_easy_perform(c)==CURLE_OK;
+ CURLcode rc=curl_easy_perform(c); if(rc==CURLE_OK&&!st.set_cookie.empty())jar.set_cookie(st.set_cookie,url,now); curl_easy_cleanup(c); return rc==CURLE_OK;
 }
 static std::string normalize(std::string s){
  s.erase(s.begin(),std::find_if(s.begin(),s.end(),[](unsigned char c){return !std::isspace(c);}));
@@ -35,8 +35,8 @@ int main(){
  const char*fontPath="/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
  #endif
  TTF_Font*f=TTF_OpenFont(fontPath,18);if(!f)return 2;
- std::string address="https://example.com",html;algerium::Page page;bool editing=false;float scroll=0;
- auto load=[&](){address=normalize(address);html.clear();scroll=0;if(fetch_page(address,html))page=algerium::load_document(html,address,1060);};
+ std::string address="https://example.com",html;algerium::Page page;algerium::CookieJar cookies;bool editing=false;float scroll=0;
+ auto load=[&](){address=normalize(address);html.clear();scroll=0;if(fetch_page(address,html,cookies,(long long)std::time(nullptr)))page=algerium::load_document(html,address,1060);};
  load();SDL_StartTextInput();bool run=true;
  while(run){SDL_Event e;while(SDL_PollEvent(&e)){if(e.type==SDL_QUIT)run=false;
   else if(e.type==SDL_MOUSEBUTTONDOWN)editing=e.button.y<58;
