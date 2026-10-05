@@ -53,8 +53,9 @@ public class PageView extends View {
                 String finalUrl=c.getURL().toString();
                 String rendered=isSearchPage(finalUrl)?h:JsEngine.get().run(h,finalUrl);
                 rendered=stripNonRenderableScripts(rendered);
+                final String pageHtml=rendered;
                 post(()->{
-                    url=finalUrl;html=rendered;push(finalUrl);parse();invalidate();
+                    url=finalUrl;html=pageHtml;push(finalUrl);parse();invalidate();
                 });
             }catch(Exception e){post(()->error(u,e.toString()));}
         }).start();
