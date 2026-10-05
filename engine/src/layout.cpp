@@ -11,7 +11,7 @@ std::vector<LayoutBox> layout_document(const Document&doc,const std::vector<CssR
  std::vector<LayoutBox>out;
  std::function<float(const Node*,float,float,float,const ComputedStyle*)>lay=
  [&](const Node*n,float x,float y,float available,const ComputedStyle*parent)->float{
-  if(!n||n->type!=Node::Type::Element)return 0;ComputedStyle s=compute_style(rules,n->name,n->attrs,parent);if(s.display=="none")return 0;
+  if(!n)return 0;if(n->type==Node::Type::Document){float yy=y;for(auto&c:n->children)if(c->type==Node::Type::Element)yy+=lay(c.get(),x,yy,available,parent);return yy-y;}ComputedStyle s=compute_style(rules,n->name,n->attrs,parent);if(s.display=="none")return 0;
   float marginW=s.margin_left+s.margin_right,padW=s.padding_left+s.padding_right,w=s.width>0?s.width:std::max(0.f,available-marginW);float contentW=std::max(1.f,w-padW);
   if(s.min_width>0) w=std::max(w,s.min_width); if(s.max_width>=0) w=std::min(w,s.max_width);
   float contentX=x+s.margin_left+s.padding_left,contentY=y+s.margin_top+s.padding_top,h=s.height>0?s.height:0;
