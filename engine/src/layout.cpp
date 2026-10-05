@@ -6,8 +6,7 @@
 namespace algerium {
 static bool blockish(const std::string&n,const ComputedStyle&s){return s.display=="block"||s.display=="flex"||s.display=="table"||n=="html"||n=="body"||n=="div"||n=="p"||n=="section"||n=="article"||n=="header"||n=="footer"||n=="main"||n=="nav"||n=="aside"||n=="h1"||n=="h2"||n=="h3"||n=="h4"||n=="ul"||n=="ol"||n=="li"||n=="form";}
 static std::string text_content(const Node*n){std::string t;if(!n)return t;if(n->type==Node::Type::Text)return n->text;for(auto&c:n->children)t+=text_content(c.get());return t;}
-static float text_height(const Node*n,const ComputedStyle&s,float w){std::string t=text_content(n);size_t chars=std::max<size_t>(1,t.size());float cw=std::max(4.f,s.font_size*.52f);size_t per=std::max<size_t>(1,(size_t)(w/cw));size_t lines=1,col=0;for(char c:t){if(c=='
-'){++lines;col=0;}else if(++col>per){++lines;col=1;}}return lines*s.font_size*s.line_height;}
+static float text_height(const Node*n,const ComputedStyle&s,float w){std::string t=text_content(n);size_t chars=std::max<size_t>(1,t.size());float cw=std::max(4.f,s.font_size*.52f);size_t per=std::max<size_t>(1,(size_t)(w/cw));size_t lines=1,col=0;for(char c:t){if(c=='\n'){++lines;col=0;}else if(++col>per){++lines;col=1;}}return lines*s.font_size*s.line_height;}
 std::vector<LayoutBox> layout_document(const Document&doc,const std::vector<CssRule>&rules,float viewport_width){
  std::vector<LayoutBox>out;
  std::function<float(const Node*,float,float,float,const ComputedStyle*)>lay=
