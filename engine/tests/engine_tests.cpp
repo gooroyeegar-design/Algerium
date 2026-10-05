@@ -1,12 +1,18 @@
 #include "algerium/engine.h"
+#include "algerium/render.h"
 #include <cassert>
 #include <iostream>
 int main(){
  using namespace algerium;
- auto p=load_document(R"(<!doctype html><html><head><style>p{display:block;color:red;font-size:20px}</style></head><body><h1 id="x">Hello</h1><p class="a">World</p></body></html>)","https://example.com",800);
+ auto p=load_document(R"(<!doctype html><html><head><style>
+ #app{display:block;padding:10px} #app .row{display:flex;gap:8px} .row a{color:red;font-size:20px} [data-x="1"]{font-weight:700}
+ </style></head><body><div id="app"><div class="row"><a href="/x" data-x="1">Hello &amp; world</a><span>!</span></div><p>wrapped text</p></div></body></html>)","https://example.com",800);
  assert(p.document.root);
- auto hs=query_selector_all(p.document.root.get(),"h1");assert(hs.size()==1&&hs[0]->attr("id")=="x");
- auto ps=query_selector_all(p.document.root.get(),"p");assert(ps.size()==1&&ps[0]->attr("class")=="a");
- assert(!p.boxes.empty());
- std::cout<<"Algerium engine smoke tests passed\n";
+ auto hs=query_selector_all(p.document.root.get(),"a");assert(hs.size()==1&&hs[0]->attr("href")=="/x");
+ auto nested=query_selector_all(p.document.root.get(),"#app .row a");assert(nested.size()==1);
+ auto attrs=query_selector_all(p.document.root.get(),"[data-x=\"1\"]");assert(attrs.size()==1);
+ assert(hs[0]->children.size()==1&&hs[0]->children[0]->text=="Hello & world");
+ assert(p.boxes.size()>=5);
+ auto paint=paint_document(p.document,p.boxes);assert(!paint.empty());
+ std::cout<<"Algerium engine compatibility smoke tests passed\n";
 }
