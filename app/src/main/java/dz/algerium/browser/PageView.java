@@ -21,8 +21,8 @@ public class PageView extends View {
 
     public interface NavigationListener { void open(String url); }
     static class Block {
-        String text; float x,y,w; int size; boolean bold;
-        Block(String t,float X,float Y,float W,int S,boolean B){text=t;x=X;y=Y;w=W;size=S;bold=B;}
+        String text; float x,y,w,h; int size,color,type; boolean bold;
+        Block(String t,float X,float Y,float W,float H,int S,int C,int T,boolean B){text=t;x=X;y=Y;w=W;h=H;size=S;color=C;type=T;bold=B;}
     }
 
     public PageView(Context c){
@@ -67,31 +67,34 @@ public class PageView extends View {
     void parse(){
         setBackgroundColor(Color.rgb(255,249,238));
         blocks.clear();scroll=0;
-        String s; try { s=NativeEngine.extractText(html,url); } catch(Throwable ignored) { s=html.replaceAll("(?is)<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<!--.*?-->",""); }
-        s=s.replaceAll("(?is)<(br|hr)\\s*/?>","\\n");
-        s=s.replaceAll("(?is)</(p|div|section|article|h[1-6]|li|tr|header|footer|main|nav|title|form|pre|table|blockquote)>","\\n\\n");
+        try {
+            String rendered=NativeEngine.render(html,url,Math.max(320,getWidth()));
+            for(String line:rendered.split("\\n")){
+                if(line.trim().isEmpty()) continue;
+                String[] q=line.split("\\t",-1); if(q.length<8) continue;
+                int type=Integer.parseInt(q[0]); float x=Float.parseFloat(q[1]), y=Float.parseFloat(q[2]);
+                float w=Float.parseFloat(q[3]), h=Float.parseFloat(q[4]); int size=Math.max(1,(int)Float.parseFloat(q[5]));
+                int color=parseColor(q[6]); String text=q[7].replace("\\n","\n").replace("\\t","\t").replace("\\\\","\\");
+                blocks.add(new Block(text,x,y,w,h,size,color,type,size>=22));
+            }
+            if(!blocks.isEmpty()){ invalidate(); return; }
+        } catch(Throwable ignored) {}
+        String s;
+        try { s=NativeEngine.extractText(html,url); } catch(Throwable ignored) { s=html.replaceAll("(?is)<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<!--.*?-->",""); }
+        s=s.replaceAll("(?is)<(br|hr)\\s*/?>","\n");
+        s=s.replaceAll("(?is)</(p|div|section|article|h[1-6]|li|tr|header|footer|main|nav|title|form|pre|table|blockquote)>","\n\n");
         s=s.replaceAll("(?is)<li[^>]*>","• ");
         s=s.replaceAll("(?is)<[^>]+>","");
-        s=decode(s).replaceAll("[ \\t]+"," ").replaceAll("\\n{3,}","\\n\\n").trim();
-
+        s=decode(s).replaceAll("[ \\t]+"," ").replaceAll("\\n{3,}","\n\n").trim();
         float y=30;
-        for(String para:s.split("\\n+")){
-            String t=para.trim();
-            if(t.isEmpty())continue;
-            boolean head=t.length()<65;
-            int size=head?22:17;
-            float w=Math.max(200,getWidth()-32);
-            while(!t.isEmpty()){
-                int n=Math.min(t.length(),Math.max(10,(int)(w/(size*.52f))));
-                int cut=n;
-                if(n<t.length()){int k=t.lastIndexOf(' ',n);if(k>4)cut=k;}
-                String part=t.substring(0,cut).trim();
-                t=t.substring(cut).trim();
-                blocks.add(new Block(part,16,y,w,size,head));
-                y+=size*1.55f;
-            }
+        for(String para:s.split("\\n+")){String t=para.trim();if(t.isEmpty())continue;int size=t.length()<65?22:17;float w=Math.max(200,getWidth()-32);
+            while(!t.isEmpty()){int n=Math.min(t.length(),Math.max(10,(int)(w/(size*.52f))));int cut=n;if(n<t.length()){int k=t.lastIndexOf(' ',n);if(k>4)cut=k;}String part=t.substring(0,cut).trim();t=t.substring(cut).trim();blocks.add(new Block(part,16,y,w,size,size,Color.rgb(25,25,28),1,size>=22));y+=size*1.55f;}
         }
-        if(blocks.isEmpty())blocks.add(new Block("No readable text was found on this page.",16,40,getWidth()-32,18,false));
+        if(blocks.isEmpty())blocks.add(new Block("No readable text was found on this page.",16,40,getWidth()-32,30,18,Color.DKGRAY,1,false));
+    }
+
+    int parseColor(String s){
+        try { if(s==null||s.equals("transparent")||s.isEmpty()) return Color.TRANSPARENT; if(s.startsWith("#")){long v=Long.parseLong(s.substring(1),16);if(s.length()==7)return Color.rgb((int)(v>>16)&255,(int)(v>>8)&255,(int)v&255);if(s.length()==4)return Color.rgb((int)((v>>8)&15)*17,(int)((v>>4)&15)*17,(int)(v&15)*17);} }catch(Exception ignored){} return Color.DKGRAY;
     }
 
     String decode(String s){
@@ -100,15 +103,12 @@ public class PageView extends View {
     }
 
     @Override protected void onDraw(Canvas c){
-        super.onDraw(c);
-        c.save();c.translate(0,-scroll);
-        p.setColor(Color.rgb(25,25,28));
-        float y;
+        super.onDraw(c); c.save(); c.translate(0,-scroll);
         for(Block b:blocks){
-            p.setTextSize(b.size);
-            p.setTypeface(Typeface.create("sans",b.bold?Typeface.BOLD:Typeface.NORMAL));
-            ArrayList<String> lines=wrap(b.text,b.w);
-            y=b.y;
+            if(b.type==0){p.setColor(b.color);c.drawRect(b.x,b.y,b.x+b.w,b.y+b.h,p);continue;}
+            if(b.type==2){p.setStyle(Paint.Style.STROKE);p.setStrokeWidth(Math.max(1,b.size));p.setColor(b.color);c.drawRect(b.x,b.y,b.x+b.w,b.y+b.h,p);p.setStyle(Paint.Style.FILL);continue;}
+            p.setColor(b.color);p.setTextSize(b.size);p.setTypeface(Typeface.create("sans",b.bold?Typeface.BOLD:Typeface.NORMAL));
+            ArrayList<String> lines=wrap(b.text,b.w);float y=b.y;
             for(String line:lines){c.drawText(line,b.x,y,p);y+=b.size*1.5f;}
         }
         c.restore();
@@ -134,7 +134,7 @@ public class PageView extends View {
         return true;
     }
 
-    int contentHeight(){return blocks.isEmpty()?0:(int)(blocks.get(blocks.size()-1).y+100);}
+    int contentHeight(){return blocks.isEmpty()?0:(int)(blocks.get(blocks.size()-1).y+Math.max(100,blocks.get(blocks.size()-1).h));}
     boolean canBack(){return pos>0;}
     boolean canForward(){return pos>=0&&pos<stack.size()-1;}
     String backUrl(){if(pos>0){pos--;return stack.get(pos);}return "about:home";}
