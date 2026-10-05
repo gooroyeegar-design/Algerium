@@ -29,6 +29,7 @@ public final class JsEngine {
 
     public String run(String html,String baseUrl){
         if(html==null)return "";
+        if(isGoogleSearch(baseUrl)) return html;
         if(context==null)return html;
         if(html.length()>BrowserPolicy.pageLimit()*2){lastError="Page source exceeded safety limit";return html;}
         String prepared=inlineExternalScripts(html,baseUrl);
@@ -114,6 +115,8 @@ public final class JsEngine {
             },Context.BIND_AUTO_CREATE);
         }catch(Throwable t){binding=false;lastError=safeError(t);}
     }
+
+    private boolean isGoogleSearch(String u){try{URI x=new URI(u);String h=x.getHost()==null?"":x.getHost().toLowerCase(java.util.Locale.US);return (h.equals("google.com")||h.endsWith(".google.com"))&&x.getPath()!=null&&x.getPath().startsWith("/search");}catch(Exception e){return false;}}
 
     private String inlineExternalScripts(String html,String base){
         if(html==null||base==null)return html;
