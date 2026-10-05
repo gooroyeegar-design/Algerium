@@ -43,15 +43,15 @@ public class MainActivity extends Activity{
   FrameLayout content=new FrameLayout(this);
   page=new PageView(this);page.setNavigationListener(u->navigate(u));content.addView(page,new FrameLayout.LayoutParams(-1,-1));
 
-  homeLayer=new LinearLayout(this);homeLayer.setOrientation(LinearLayout.VERTICAL);homeLayer.setGravity(Gravity.CENTER_HORIZONTAL);homeLayer.setPadding(30,30,30,28);homeLayer.setBackgroundColor(Color.TRANSPARENT);
-  ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.ic_algerium);homeLayer.addView(logo,new LinearLayout.LayoutParams(126,126));
-  TextView brand=tv("Algerium",34);brand.setTextColor(green);brand.setTypeface(android.graphics.Typeface.create("sans",android.graphics.Typeface.NORMAL));brand.setLetterSpacing(.01f);
-  homeLayer.addView(brand,new LinearLayout.LayoutParams(-2,58));
-  TextView tagline=tv("a browser for Algeria",17);tagline.setTextColor(brown);tagline.setLetterSpacing(.18f);homeLayer.addView(tagline,new LinearLayout.LayoutParams(-2,42));
+  homeLayer=new LinearLayout(this);homeLayer.setOrientation(LinearLayout.VERTICAL);homeLayer.setGravity(Gravity.CENTER_HORIZONTAL);homeLayer.setPadding(24,24,24,24);homeLayer.setBackgroundColor(Color.TRANSPARENT);
+  ImageView logo=new ImageView(this);logo.setImageResource(R.drawable.ic_algerium);homeLayer.addView(logo,new LinearLayout.LayoutParams(172,172));
+  TextView brand=tv("Algerium",38);brand.setTextColor(green);brand.setTypeface(android.graphics.Typeface.create("sans",android.graphics.Typeface.NORMAL));brand.setLetterSpacing(.01f);
+  homeLayer.addView(brand,new LinearLayout.LayoutParams(-2,62));
+  TextView tagline=tv("a browser for Algeria",17);tagline.setTextColor(brown);tagline.setLetterSpacing(.18f);homeLayer.addView(tagline,new LinearLayout.LayoutParams(-2,44));
   homeSearch=new EditText(this);homeSearch.setSingleLine(true);homeSearch.setTextSize(18);homeSearch.setTextColor(brown);homeSearch.setHintTextColor(Color.rgb(150,137,116));homeSearch.setHint("Search or enter address…");homeSearch.setPadding(22,0,22,0);homeSearch.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_search,0,0,0);homeSearch.setCompoundDrawablePadding(14);homeSearch.setBackgroundResource(R.drawable.rounded_search);
-  LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,62);sp.topMargin=36;homeLayer.addView(homeSearch,sp);
-  HomeArtView art=new HomeArtView(this);LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,300);ap.topMargin=18;homeLayer.addView(art,ap);
-  FrameLayout.LayoutParams hp=new FrameLayout.LayoutParams(-1,-2,Gravity.TOP);hp.topMargin=115;content.addView(homeLayer,hp);
+  LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,62);sp.topMargin=42;homeLayer.addView(homeSearch,sp);
+  HomeArtView art=new HomeArtView(this);LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,390);ap.topMargin=78;homeLayer.addView(art,ap);
+  FrameLayout.LayoutParams hp=new FrameLayout.LayoutParams(-1,-2,Gravity.TOP);hp.topMargin=128;content.addView(homeLayer,hp);
 
   LinearLayout nav=new LinearLayout(this);nav.setGravity(Gravity.CENTER);nav.setPadding(8,3,8,4);
   String[] labs={"⌂\nHome","☆\nBookmarks","◷\nHistory","☰\nMenu"};
