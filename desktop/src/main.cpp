@@ -3,15 +3,15 @@
 #include <curl/curl.h>
 #include "algerium/engine.h"
 #include "algerium/cookies.h"
-#include <string>
+#include <string>\n#include <vector>
 #include <algorithm>
 #include <cctype>\n#include <ctime>
-struct NetState { std::string body; std::string set_cookie; };\nstatic size_t write_cb(char* p,size_t s,size_t n,void* u){auto*out=(std::string*)u;size_t z=s*n;if(out->size()+z>8*1024*1024)return 0;out->append(p,z);return z;}\nstatic size_t header_cb(char* p,size_t s,size_t n,void* u){auto*st=(NetState*)u;size_t z=s*n;std::string h(p,z);if(h.rfind("Set-Cookie:",0)==0||h.rfind("set-cookie:",0)==0)st->set_cookie+=h.substr(h.find(":")+1);return z;}\nstatic bool fetch_page(const std::string& url,std::string& out,CookieJar& jar,long long now){
+struct NetState { std::vector<std::string> set_cookies; };\nstatic size_t write_cb(char* p,size_t s,size_t n,void* u){auto*out=(std::string*)u;size_t z=s*n;if(out->size()+z>8*1024*1024)return 0;out->append(p,z);return z;}\nstatic size_t header_cb(char* p,size_t s,size_t n,void* u){auto*st=(NetState*)u;size_t z=s*n;std::string h(p,z);if(h.rfind("Set-Cookie:",0)==0||h.rfind("set-cookie:",0)==0)st->set_cookies.push_back(h.substr(h.find(":")+1));return z;}\nstatic bool fetch_page(const std::string& url,std::string& out,CookieJar& jar,long long now){
  CURL* c=curl_easy_init();if(!c)return false;
  curl_easy_setopt(c,CURLOPT_URL,url.c_str());curl_easy_setopt(c,CURLOPT_FOLLOWLOCATION,1L);curl_easy_setopt(c,CURLOPT_MAXREDIRS,8L);
  NetState st; curl_easy_setopt(c,CURLOPT_WRITEFUNCTION,write_cb);curl_easy_setopt(c,CURLOPT_WRITEDATA,&out);curl_easy_setopt(c,CURLOPT_HEADERFUNCTION,header_cb);curl_easy_setopt(c,CURLOPT_HEADERDATA,&st);std::string cookies=jar.cookie_header(url,now);if(!cookies.empty())curl_easy_setopt(c,CURLOPT_COOKIE,cookies.c_str());curl_easy_setopt(c,CURLOPT_USERAGENT,"Algerium/0.3");
  curl_easy_setopt(c,CURLOPT_PROTOCOLS_STR,"http,https");curl_easy_setopt(c,CURLOPT_REDIR_PROTOCOLS_STR,"http,https");curl_easy_setopt(c,CURLOPT_TIMEOUT,20L);curl_easy_setopt(c,CURLOPT_CONNECTTIMEOUT,8L);curl_easy_setopt(c,CURLOPT_NOSIGNAL,1L);curl_easy_setopt(c,CURLOPT_SSL_VERIFYPEER,1L);curl_easy_setopt(c,CURLOPT_SSL_VERIFYHOST,2L);
- CURLcode rc=curl_easy_perform(c); if(rc==CURLE_OK&&!st.set_cookie.empty())jar.set_cookie(st.set_cookie,url,now); curl_easy_cleanup(c); return rc==CURLE_OK;
+ CURLcode rc=curl_easy_perform(c); if(rc==CURLE_OK)for(const auto&sc:st.set_cookies)jar.set_cookie(sc,url,now); curl_easy_cleanup(c); return rc==CURLE_OK;
 }
 static std::string normalize(std::string s){
  s.erase(s.begin(),std::find_if(s.begin(),s.end(),[](unsigned char c){return !std::isspace(c);}));
