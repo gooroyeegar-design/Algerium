@@ -9,7 +9,7 @@ class EventTarget {
  std::unordered_map<std::string,std::vector<std::function<void(Event&)>>> listeners;
 public:
  void add_event_listener(const std::string&type,std::function<void(Event&)> cb);
- bool dispatch_event(Event e);
+ bool dispatch_event(Event& e);
  void remove_event_listener(const std::string&type);
 };
 }
