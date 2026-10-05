@@ -7,3 +7,5 @@ const HistoryEntry& SessionHistory::current()const{return entries.at(index);}
 const HistoryEntry& SessionHistory::back(){if(can_go_back())--index;return current();}
 const HistoryEntry& SessionHistory::forward(){if(can_go_forward())++index;return current();}
 }
+
+void algerium::SessionHistory::replace_current(HistoryEntry e){ if(entries.empty()){entries.push_back(std::move(e));index=0;}else entries[index]=std::move(e); }
