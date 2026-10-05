@@ -15,8 +15,8 @@ std::vector<LayoutBox> layout_document(const Document&doc,const std::vector<CssR
   if(!n||n->type!=Node::Type::Element)return 0;ComputedStyle s=compute_style(rules,n->name,n->attrs,parent);if(s.display=="none")return 0;
   float marginW=s.margin_left+s.margin_right,padW=s.padding_left+s.padding_right,w=s.width>0?s.width:std::max(0.f,available-marginW);float contentW=std::max(1.f,w-padW);
   if(s.min_width>0) w=std::max(w,s.min_width); if(s.max_width>=0) w=std::min(w,s.max_width);
-  if(s.min_height>0) h=std::max(h,s.min_height); if(s.max_height>=0) h=std::min(h,s.max_height);
   float contentX=x+s.margin_left+s.padding_left,contentY=y+s.margin_top+s.padding_top,h=s.height>0?s.height:0;
+  if(s.min_height>0) h=std::max(h,s.min_height); if(s.max_height>=0) h=std::min(h,s.max_height);
   if(h<=0&&(n->name=="img"||n->name=="video"||n->name=="canvas"))h=150;
   if(h<=0&&!blockish(n->name,s))h=text_height(n,s,contentW)+s.padding_top+s.padding_bottom;
   if(h<=0)h=(n->name=="h1"?42:n->name=="h2"?34:n->name=="h3"?28:n->name=="p"?28:20)+s.padding_top+s.padding_bottom;
