@@ -31,8 +31,8 @@ static bool simple_match(const std::string&q,const std::string&tag,const std::un
 static bool matches(const std::string&q,const std::string&tag,const std::unordered_map<std::string,std::string>&a){
  std::stringstream ss(q);std::string part;std::vector<std::string>v;while(ss>>part)v.push_back(part);if(v.empty())return false;return simple_match(v.back(),tag,a);
 }
-ComputedStyle compute_style(const std::vector<CssRule>&rules,const std::string&tag,const std::unordered_map<std::string,std::string>&attrs,const ComputedStyle*parent){
- ComputedStyle s;if(parent){s.color=parent->color;s.font_family=parent->font_family;s.font_size=parent->font_size;s.line_height=parent->line_height;}
+static bool is_block_tag(const std::string&t){return t=="html"||t=="body"||t=="div"||t=="main"||t=="section"||t=="article"||t=="header"||t=="footer"||t=="nav"||t=="aside"||t=="p"||t=="h1"||t=="h2"||t=="h3"||t=="h4"||t=="h5"||t=="h6"||t=="ul"||t=="ol"||t=="li"||t=="form"||t=="table"||t=="tr"||t=="pre";}\nComputedStyle compute_style(const std::vector<CssRule>&rules,const std::string&tag,const std::unordered_map<std::string,std::string>&attrs,const ComputedStyle*parent){
+ ComputedStyle s;\n if(is_block_tag(tag)) s.display="block";if(parent){s.color=parent->color;s.font_family=parent->font_family;s.font_size=parent->font_size;s.line_height=parent->line_height;}
  struct Pick{int score=-1;size_t order=0;std::string v;};std::unordered_map<std::string,Pick>picks;size_t order=0;
  for(auto&r:rules){if(matches(r.selector,tag,attrs))for(auto&d:r.declarations){auto&p=picks[d.property];int score=r.specificity;if(score>p.score||(score==p.score&&order>=p.order))p={score,order,d.value};}++order;}
  auto in=attrs.find("style");if(in!=attrs.end()){auto rs=parse_css("*{"+in->second+"}");if(!rs.empty())for(auto&d:rs[0].declarations)picks[d.property]={1000,order,d.value};}
