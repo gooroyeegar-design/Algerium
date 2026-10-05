@@ -13,7 +13,9 @@ struct Node {
     std::vector<std::unique_ptr<Node>> children;
     Node* parent=nullptr;
     explicit Node(Type t=Type::Element,std::string n={}):type(t),name(std::move(n)){}
-    Node* append(std::unique_ptr<Node> n){n->parent=this; Node* p=n.get(); children.push_back(std::move(n)); return p;}\n    Node* first_element_child() const { for(auto& c:children) if(c->type==Type::Element) return c.get(); return nullptr; }\n    Node* next_element_sibling() const { if(!parent) return nullptr; bool seen=false; for(auto& c:parent->children){ if(c.get()==this){seen=true;continue;} if(seen&&c->type==Type::Element)return c.get(); } return nullptr; }
+    Node* append(std::unique_ptr<Node> n){n->parent=this; Node* p=n.get(); children.push_back(std::move(n)); return p;}
+    Node* first_element_child() const { for(auto& c:children) if(c->type==Type::Element) return c.get(); return nullptr; }
+    Node* next_element_sibling() const { if(!parent) return nullptr; bool seen=false; for(auto& c:parent->children){ if(c.get()==this){seen=true;continue;} if(seen&&c->type==Type::Element)return c.get(); } return nullptr; }
     std::string attr(const std::string& k) const {auto i=attrs.find(k);return i==attrs.end()?"":i->second;}
     bool has(const std::string& k) const {return attrs.find(k)!=attrs.end();}
 };
