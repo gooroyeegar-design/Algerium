@@ -5,7 +5,7 @@
 #include <sstream>
 namespace algerium {
 static std::string lower(std::string s){for(char&c:s)c=(char)std::tolower((unsigned char)c);return s;}
-static std::string trim(std::string s){auto a=s.find_first_not_of(" \t");auto b=s.find_last_not_of(" \t");return a==std::string::npos?"":s.substr(a,b-a+1);}
+static std::string trim(std::string s){auto a=s.find_first_not_of(" \t"); size_t b=s.find_last_not_of(" \t");return a==std::string::npos?"":s.substr(a,b-a+1);}
 static bool domain_match(const std::string&host,const std::string&domain){return host==domain||(host.size()>domain.size()&&host.compare(host.size()-domain.size(),domain.size(),domain)==0&&host[host.size()-domain.size()-1]=='.');}
 static std::string default_path(const std::string&url){auto p=url.find("://");auto slash=url.find('/',p==std::string::npos?0:p+3);if(slash==std::string::npos)return "/";auto end=url.find_last_of('/');return end==0?"/":url.substr(slash,end-slash);}
 bool CookieJar::set_cookie(const std::string&header,const std::string&request_url,long long now){
