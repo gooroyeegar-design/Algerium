@@ -4,8 +4,6 @@
 #include <sstream>
 namespace algerium {
 static std::string trim(std::string s){auto a=s.find_first_not_of(" \t\r\n");auto b=s.find_last_not_of(" \t\r\n");return a==std::string::npos?"":s.substr(a,b-a+1);}
-");auto b=s.find_last_not_of(" \t\r
-");return a==std::string::npos?"":s.substr(a,b-a+1);}
 static std::string lower(std::string s){for(char&c:s)c=(char)std::tolower((unsigned char)c);return s;}
 static float px(const std::string&v,float f=0){try{if(v=="auto")return f;if(v.size()>2&&v.substr(v.size()-2)=="px")return std::stof(v);return std::stof(v);}catch(...){return f;}}
 static void split4(const std::string&v,float&a,float&b,float&c,float&d){std::stringstream ss(v);std::string x;std::vector<float> q;while(ss>>x){if(x.back()==';')x.pop_back();q.push_back(px(x));}if(q.empty())return;if(q.size()==1)a=b=c=d=q[0];else if(q.size()==2){a=c=q[0];b=d=q[1];}else if(q.size()==3){a=q[0];b=d=q[1];c=q[2];}else{a=q[0];b=q[1];c=q[2];d=q[3];}}
