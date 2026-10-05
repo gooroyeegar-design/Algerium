@@ -151,9 +151,9 @@ public class PageView extends View {
 
     void error(String u,String e){
         blocks.clear();
-        blocks.add(new Block("Algerium couldn't load this page",20,60,getWidth()-40,25,true));
-        blocks.add(new Block(u,20,110,getWidth()-40,16,false));
-        blocks.add(new Block(e,20,155,getWidth()-40,15,false));
+        blocks.add(new Block("Algerium couldn't load this page",20,60,getWidth()-40,32,25,Color.rgb(35,35,35),1,true));
+        blocks.add(new Block(u,20,110,getWidth()-40,24,16,Color.DKGRAY,1,false));
+        blocks.add(new Block(e,20,155,getWidth()-40,24,15,Color.DKGRAY,1,false));
         invalidate();
     }
 }
