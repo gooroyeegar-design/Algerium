@@ -7,6 +7,7 @@ add_library(algerium_engine STATIC
     ../../../../engine/src/layout.cpp
     ../../../../engine/src/html_parser.cpp
     ../../../../engine/src/engine.cpp
+    ../../../../engine/src/render.cpp
 )
 target_include_directories(algerium_engine PUBLIC ../../../../engine/include)
 add_library(algerium_native SHARED algerium_jni.cpp)
