@@ -13,6 +13,7 @@ add_library(algerium_engine STATIC
     src/navigation.cpp
     src/render.cpp
     src/resources.cpp
+    src/cookies.cpp
 )
 target_include_directories(algerium_engine PUBLIC include)
 if(MSVC)
