@@ -46,12 +46,12 @@ int main(){
  while(run){SDL_Event e;while(SDL_PollEvent(&e)){if(e.type==SDL_QUIT)run=false;
   else if(e.type==SDL_MOUSEBUTTONDOWN)editing=e.button.y<58;
   else if(e.type==SDL_TEXTINPUT&&editing)address+=e.text.text;
-  else if(e.type==SDL_KEYDOWN){if(editing&&e.key.keysym.sym==SDLK_BACKSPACE&&!address.empty())address.pop_back();if(editing&&e.key.keysym.sym==SDLK_RETURN){editing=false;load();}if(!editing&&e.key.keysym.sym==SDLK_F5)load();if(e.key.keysym.sym==SDLK_DOWN)scroll+=40;if(e.key.keysym.sym==SDLK_UP)scroll=std::max(0.f,scroll-40);}
-  else if(e.type==SDL_MOUSEWHEEL)scroll=std::max(0.f,scroll-e.wheel.y*40);}
+  else if(e.type==SDL_KEYDOWN){if(editing&&e.key.keysym.sym==SDLK_BACKSPACE&&!address.empty())address.pop_back();if(editing&&e.key.keysym.sym==SDLK_RETURN){editing=false;load();}if(!editing&&e.key.keysym.sym==SDLK_F5)load();if(e.key.keysym.sym==SDLK_DOWN)scroll+=40;if(e.key.keysym.sym==SDLK_UP)scroll=(std::max)(0.f,scroll-40);}
+  else if(e.type==SDL_MOUSEWHEEL)scroll=(std::max)(0.f,scroll-e.wheel.y*40);}
   SDL_SetRenderDrawColor(r,243,232,210,255);SDL_RenderClear(r);
   SDL_SetRenderDrawColor(r,255,249,238,255);SDL_Rect bar{14,12,1072,42};SDL_RenderFillRect(r,&bar);draw_text(r,f,"Algerium",28,22,{49,88,58,255});draw_text(r,f,address,150,22,{70,60,45,255});
   SDL_SetRenderDrawColor(r,255,255,255,255);SDL_Rect body{14,68,1072,678};SDL_RenderFillRect(r,&body);
-  int y=92-(int)scroll;for(const auto&b:page.boxes){if(!b.node||b.node->type!=algerium::Node::Type::Element)continue;std::string value;for(auto&c:b.node->children)if(c->type==algerium::Node::Type::Text)value+=c->text;if(value.empty())continue;std::replace(value.begin(),value.end(),'\n',' ');if(y>760)break;draw_text(r,f,value,24,y,{25,25,28,255});y+=std::max(24.f,b.height)+8;}
+  int y=92-(int)scroll;for(const auto&b:page.boxes){if(!b.node||b.node->type!=algerium::Node::Type::Element)continue;std::string value;for(auto&c:b.node->children)if(c->type==algerium::Node::Type::Text)value+=c->text;if(value.empty())continue;std::replace(value.begin(),value.end(),'\n',' ');if(y>760)break;draw_text(r,f,value,24,y,{25,25,28,255});y+=(std::max)(24.f,b.height)+8;}
   SDL_RenderPresent(r);
  }
  SDL_StopTextInput();TTF_CloseFont(f);SDL_DestroyRenderer(r);SDL_DestroyWindow(w);curl_global_cleanup();TTF_Quit();SDL_Quit();return 0;
