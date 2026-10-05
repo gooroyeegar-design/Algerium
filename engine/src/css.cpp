@@ -30,7 +30,7 @@ ComputedStyle compute_style(const std::vector<CssRule>& rules,const std::string&
    auto inlineRules=parse_css("*{"+inlineStyle->second+"}");
    if(!inlineRules.empty()) for(const auto& d:inlineRules.front().declarations)picks[d.property]={1000,d.value};
  }
- for(auto&[k,p]:picks){auto v=p.v;if(k=="display")s.display=v;else if(k=="position")s.position=v;else if(k=="color")s.color=v;else if(k=="background"||k=="background-color")s.background=v;else if(k=="font-size")s.font_size=px(v,16);else if(k=="font-weight")s.bold=(v=="bold"||v=="700");else if(k=="width")s.width=px(v,-1);else if(k=="height")s.height=px(v,-1);else if(k=="margin")s.margin_top=s.margin_right=s.margin_bottom=s.margin_left=px(v);else if(k=="padding")s.padding_top=s.padding_right=s.padding_bottom=s.padding_left=px(v);}
+ for(auto&[k,p]:picks){auto v=p.v;if(k=="display")s.display=v;else if(k=="position")s.position=v;else if(k=="color")s.color=v;else if(k=="background"||k=="background-color")s.background=v;else if(k=="font-size")s.font_size=px(v,16);else if(k=="font-weight")s.bold=(v=="bold"||v=="700");else if(k=="width")s.width=px(v,-1);else if(k=="height")s.height=px(v,-1);else if(k=="margin")s.margin_top=s.margin_right=s.margin_bottom=s.margin_left=px(v);else if(k=="padding")s.padding_top=s.padding_right=s.padding_bottom=s.padding_left=px(v);else if(k=="line-height")s.line_height=px(v,1.2f);else if(k=="gap")s.gap=px(v);else if(k=="flex-direction")s.flex_direction=v;else if(k=="text-align")s.text_align=v;else if(k=="border-width")s.border_width=px(v);else if(k=="border-radius")s.border_radius=px(v);}
  return s;
 }
 }
