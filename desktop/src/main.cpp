@@ -11,7 +11,7 @@
 struct NetState { std::vector<std::string> set_cookies; };
 static size_t write_cb(char* p,size_t s,size_t n,void* u){auto*out=(std::string*)u;size_t z=s*n;if(out->size()+z>8*1024*1024)return 0;out->append(p,z);return z;}
 static size_t header_cb(char* p,size_t s,size_t n,void* u){auto*st=(NetState*)u;size_t z=s*n;std::string h(p,z);if(h.rfind("Set-Cookie:",0)==0||h.rfind("set-cookie:",0)==0)st->set_cookies.push_back(h.substr(h.find(":")+1));return z;}
-static bool fetch_page(const std::string& url,std::string& out,CookieJar& jar,long long now){
+static bool fetch_page(const std::string& url,std::string& out,algerium::CookieJar& jar,long long now){
  CURL* c=curl_easy_init();if(!c)return false;
  curl_easy_setopt(c,CURLOPT_URL,url.c_str());curl_easy_setopt(c,CURLOPT_FOLLOWLOCATION,1L);curl_easy_setopt(c,CURLOPT_MAXREDIRS,8L);
  NetState st; curl_easy_setopt(c,CURLOPT_WRITEFUNCTION,write_cb);curl_easy_setopt(c,CURLOPT_WRITEDATA,&out);curl_easy_setopt(c,CURLOPT_HEADERFUNCTION,header_cb);curl_easy_setopt(c,CURLOPT_HEADERDATA,&st);std::string cookies=jar.cookie_header(url,now);if(!cookies.empty())curl_easy_setopt(c,CURLOPT_COOKIE,cookies.c_str());curl_easy_setopt(c,CURLOPT_USERAGENT,"Algerium/0.3");
@@ -51,8 +51,7 @@ int main(){
   SDL_SetRenderDrawColor(r,243,232,210,255);SDL_RenderClear(r);
   SDL_SetRenderDrawColor(r,255,249,238,255);SDL_Rect bar{14,12,1072,42};SDL_RenderFillRect(r,&bar);draw_text(r,f,"Algerium",28,22,{49,88,58,255});draw_text(r,f,address,150,22,{70,60,45,255});
   SDL_SetRenderDrawColor(r,255,255,255,255);SDL_Rect body{14,68,1072,678};SDL_RenderFillRect(r,&body);
-  int y=92-(int)scroll;for(const auto&b:page.boxes){if(!b.node||b.node->type!=algerium::Node::Type::Element)continue;std::string value;for(auto&c:b.node->children)if(c->type==algerium::Node::Type::Text)value+=c->text;if(value.empty())continue;std::replace(value.begin(),value.end(),'
-',' ');if(y>760)break;draw_text(r,f,value,24,y,{25,25,28,255});y+=std::max(24.f,b.height)+8;}
+  int y=92-(int)scroll;for(const auto&b:page.boxes){if(!b.node||b.node->type!=algerium::Node::Type::Element)continue;std::string value;for(auto&c:b.node->children)if(c->type==algerium::Node::Type::Text)value+=c->text;if(value.empty())continue;std::replace(value.begin(),value.end(),'\n',' ');if(y>760)break;draw_text(r,f,value,24,y,{25,25,28,255});y+=std::max(24.f,b.height)+8;}
   SDL_RenderPresent(r);
  }
  SDL_StopTextInput();TTF_CloseFont(f);SDL_DestroyRenderer(r);SDL_DestroyWindow(w);curl_global_cleanup();TTF_Quit();SDL_Quit();return 0;
