@@ -67,7 +67,7 @@ public class PageView extends View {
     void parse(){
         setBackgroundColor(Color.rgb(255,249,238));
         blocks.clear();scroll=0;
-        String s=html.replaceAll("(?is)<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<!--.*?-->","");
+        String s; try { s=NativeEngine.extractText(html,url); } catch(Throwable ignored) { s=html.replaceAll("(?is)<script.*?</script>|<style.*?</style>|<svg.*?</svg>|<!--.*?-->",""); }
         s=s.replaceAll("(?is)<(br|hr)\\s*/?>","\\n");
         s=s.replaceAll("(?is)</(p|div|section|article|h[1-6]|li|tr|header|footer|main|nav|title|form|pre|table|blockquote)>","\\n\\n");
         s=s.replaceAll("(?is)<li[^>]*>","• ");
