@@ -17,8 +17,9 @@ std::vector<PaintCommand> paint_document(const Document&,const std::vector<Layou
   if(b.style.border_width>0)out.push_back({PaintCommand::Type::Border,b.x,b.y,b.width,b.height,{},tag_color(b.style),b.style.border_width});
   auto t=text_content(b.node);if(t.empty())continue;
   float tx=b.x+b.style.padding_left;
-  if(b.style.text_align=="center")tx=b.x+std::max(0.f,(b.width-b.style.padding_left-b.style.padding_right)*.5f);
-  else if(b.style.text_align=="right")tx=b.x+std::max(0.f,b.width-b.style.padding_right);
+  float estimated=text_content(b.node).size()*b.style.font_size*.52f;
+  if(b.style.text_align=="center")tx=b.x+std::max(0.f,(b.width-estimated)*.5f);
+  else if(b.style.text_align=="right")tx=b.x+std::max(0.f,b.width-estimated-b.style.padding_right);
   out.push_back({PaintCommand::Type::Text,tx,b.y+b.style.padding_top,b.width,b.height,t,tag_color(b.style),b.style.font_size});
  }
  return out;
