@@ -13,12 +13,14 @@ public class PageView extends View {
     String url="", html="";
     ArrayList<String> stack=new ArrayList<>();
     int pos=-1;
-    float scroll=0, sy;
+    float scroll=0, sy, downX, downY;
     ArrayList<Block> blocks=new ArrayList<>();
+    ArrayList<Link> links=new ArrayList<>();
     String query="";
     private NavigationListener navigationListener;
 
     public interface NavigationListener { void open(String url); }
+    static class Link { String url; float x,y,w,h; Link(String u,float X,float Y,float W,float H){url=u;x=X;y=Y;w=W;h=H;} boolean hit(float px,float py){return px>=x&&px<=x+w&&py>=y&&py<=y+h;} }
     static class Block {
         String text; float x,y,w,h; int size,color,type; boolean bold;
         Block(String t,float X,float Y,float W,float H,int S,int C,int T,boolean B){
@@ -33,7 +35,7 @@ public class PageView extends View {
         setFocusable(true);
     }
     public void setNavigationListener(NavigationListener l){navigationListener=l;}
-    void home(){blocks.clear();scroll=0;setBackgroundColor(Color.rgb(243,232,210));invalidate();}
+    void home(){blocks.clear();links.clear();scroll=0;setBackgroundColor(Color.rgb(243,232,210));invalidate();}
 
     void load(String u){
         if(u.equals("about:home")){home();return;}
@@ -86,7 +88,7 @@ public class PageView extends View {
                 String text=q[7].replace("\\n","\n").replace("\\t","\t").replace("\\\\","\\");
                 blocks.add(new Block(text,x,y,w,h,size,color,type,size>=22));
             }
-            if(!blocks.isEmpty()){invalidate();return;}
+            if(!blocks.isEmpty()){buildLinkHitboxes(cleaned);invalidate();return;}
         }catch(Throwable ignored){}
         String s;
         try{s=NativeEngine.extractText(html,url);}catch(Throwable ignored){
@@ -109,6 +111,7 @@ public class PageView extends View {
             }
         }
         if(blocks.isEmpty())blocks.add(new Block("No readable text was found on this page.",16,40,getWidth()-32,30,18,Color.DKGRAY,1,false));
+        buildLinkHitboxes(html);
     }
 
     int parseColor(String s){
@@ -166,14 +169,45 @@ public class PageView extends View {
         if(!line.isEmpty())a.add(line);return a;
     }
 
+    void buildLinkHitboxes(String source){
+        links.clear();
+        if(source==null||source.isEmpty()||blocks.isEmpty())return;
+        String lower=source.toLowerCase(Locale.US);
+        int at=0;
+        while((at=lower.indexOf("<a",at))>=0){
+            int openEnd=source.indexOf('>',at); if(openEnd<0)break;
+            int close=lower.indexOf("</a>",openEnd); if(close<0)break;
+            String tag=source.substring(at,openEnd+1);
+            int hs=tag.toLowerCase(Locale.US).indexOf("href=");
+            if(hs>=0){
+                int p=hs+5; while(p<tag.length()&&Character.isWhitespace(tag.charAt(p)))p++;
+                String href="";
+                if(p<tag.length()&&(tag.charAt(p)=='"'||tag.charAt(p)=='\\'')){char q=tag.charAt(p++);int e=tag.indexOf(q,p);if(e>p)href=tag.substring(p,e);}
+                else {int e=p;while(e<tag.length()&&!Character.isWhitespace(tag.charAt(e))&&tag.charAt(e)!='>')e++;href=tag.substring(p,e);}
+                String label=source.substring(openEnd+1,close).replaceAll("(?is)<[^>]+>","").replaceAll("\\s+"," ").trim();
+                if(!href.isEmpty()&&!label.isEmpty())try{
+                    String target=BrowserPolicy.resolveHttp(url,decode(href));
+                    for(Block b:blocks)if(b.type==1&&b.text.toLowerCase(Locale.US).contains(label.toLowerCase(Locale.US))){
+                        p.setTextSize(b.size); links.add(new Link(target,b.x,b.y,Math.min(b.w,Math.max(80,p.measureText(label)+20)),Math.max(b.h,b.size*1.5f)));break;
+                    }
+                }catch(Exception ignored){}
+            }
+            at=close+4;
+        }
+    }
+
     @Override public boolean onTouchEvent(MotionEvent e){
-        if(e.getAction()==0){sy=e.getY();return true;}
+        if(e.getAction()==0){sy=e.getY();downX=e.getX();downY=e.getY();return true;}
         if(e.getAction()==2){
             float d=sy-e.getY(); if(Math.abs(d)<0.5f)return true;
             scroll=Math.max(0,Math.min(Math.max(0,contentHeight()-getHeight()+30),scroll+d));
             sy=e.getY();invalidate();return true;
         }
         if(e.getAction()==1){
+            if(Math.abs(e.getY()-downY)+Math.abs(e.getX()-downX)<20){
+                float py=e.getY()+scroll;
+                for(Link l:links)if(l.hit(e.getX(),py)){if(navigationListener!=null)navigationListener.open(l.url);break;}
+            }
             performClick(); return true;
         }
         return true;
