@@ -182,7 +182,7 @@ public class PageView extends View {
             if(hs>=0){
                 int p=hs+5; while(p<tag.length()&&Character.isWhitespace(tag.charAt(p)))p++;
                 String href="";
-                if(p<tag.length()&&(tag.charAt(p)=='"'||tag.charAt(p)=='\\'')){char q=tag.charAt(p++);int e=tag.indexOf(q,p);if(e>p)href=tag.substring(p,e);}
+                if(p<tag.length()&&(tag.charAt(p)=='"'||tag.charAt(p)==(char)39)){char q=tag.charAt(p++);int e=tag.indexOf(q,p);if(e>p)href=tag.substring(p,e);}
                 else {int e=p;while(e<tag.length()&&!Character.isWhitespace(tag.charAt(e))&&tag.charAt(e)!='>')e++;href=tag.substring(p,e);}
                 String label=source.substring(openEnd+1,close).replaceAll("(?is)<[^>]+>","").replaceAll("\\s+"," ").trim();
                 if(!href.isEmpty()&&!label.isEmpty())try{
