@@ -180,10 +180,10 @@ public class PageView extends View {
             String tag=source.substring(at,openEnd+1);
             int hs=tag.toLowerCase(Locale.US).indexOf("href=");
             if(hs>=0){
-                int p=hs+5; while(p<tag.length()&&Character.isWhitespace(tag.charAt(p)))p++;
+                int cursor=hs+5; while(cursor<tag.length()&&Character.isWhitespace(tag.charAt(cursor)))cursor++;
                 String href="";
-                if(p<tag.length()&&(tag.charAt(p)=='"'||tag.charAt(p)==(char)39)){char q=tag.charAt(p++);int e=tag.indexOf(q,p);if(e>p)href=tag.substring(p,e);}
-                else {int e=p;while(e<tag.length()&&!Character.isWhitespace(tag.charAt(e))&&tag.charAt(e)!='>')e++;href=tag.substring(p,e);}
+                if(cursor<tag.length()&&(tag.charAt(cursor)=='"'||tag.charAt(cursor)==(char)39)){char q=tag.charAt(cursor++);int e=tag.indexOf(q,cursor);if(e>cursor)href=tag.substring(cursor,e);}
+                else {int e=cursor;while(e<tag.length()&&!Character.isWhitespace(tag.charAt(e))&&tag.charAt(e)!='>')e++;href=tag.substring(cursor,e);}
                 String label=source.substring(openEnd+1,close).replaceAll("(?is)<[^>]+>","").replaceAll("\\s+"," ").trim();
                 if(!href.isEmpty()&&!label.isEmpty())try{
                     String target=BrowserPolicy.resolveHttp(url,decode(href));
