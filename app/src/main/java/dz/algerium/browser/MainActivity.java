@@ -65,7 +65,7 @@ public class MainActivity extends Activity{
   FrameLayout.LayoutParams pageLp=new FrameLayout.LayoutParams(-1,-1); pageLp.bottomMargin=dp(72); content.addView(page,pageLp);
 
   homeLayer=new LinearLayout(this); homeLayer.setOrientation(LinearLayout.VERTICAL);
-  homeLayer.setGravity(Gravity.CENTER_HORIZONTAL); homeLayer.setPadding(24,18,24,14);
+  homeLayer.setGravity(Gravity.CENTER_HORIZONTAL); homeLayer.setPadding(dp(24),dp(18),dp(24),dp(14));
 
   ImageView logo=new ImageView(this); logo.setImageResource(R.drawable.ic_algerium); logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
   homeLayer.addView(logo,new LinearLayout.LayoutParams(-1,0,.32f));
@@ -80,7 +80,7 @@ public class MainActivity extends Activity{
   homeSearch=new EditText(this); homeSearch.setSingleLine(true); homeSearch.setTextSize(18);
   homeSearch.setTextColor(brown); homeSearch.setHintTextColor(Color.rgb(150,137,116)); homeSearch.setHint("Search or enter address…");
   homeSearch.setPadding(dp(22),0,dp(22),0); homeSearch.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_search,0,0,0);
-  homeSearch.setCompoundDrawablePadding(14); homeSearch.setBackgroundResource(R.drawable.rounded_search); homeSearch.setIncludeFontPadding(true);
+  homeSearch.setCompoundDrawablePadding(dp(14)); homeSearch.setBackgroundResource(R.drawable.rounded_search); homeSearch.setIncludeFontPadding(true);
   LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,dp(62)); sp.topMargin=dp(18); homeLayer.addView(homeSearch,sp);
 
   HomeArtView art=new HomeArtView(this); LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,0,1f); ap.topMargin=dp(18); homeLayer.addView(art,ap);
