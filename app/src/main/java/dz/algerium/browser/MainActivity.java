@@ -46,7 +46,7 @@ public class MainActivity extends Activity{
 
   LinearLayout tabs=new LinearLayout(this); tabs.setGravity(Gravity.CENTER_VERTICAL); tabs.setPadding(dp(12),dp(5),dp(8),0);
   title=tv("Algerium",17); title.setTextColor(green); title.setGravity(Gravity.CENTER_VERTICAL);
-  title.setPadding(14,0,0,0); title.setBackground(bg(Color.rgb(250,242,227),26));
+  title.setPadding(dp(14),0,0,0); title.setBackground(bg(Color.rgb(250,242,227),26));
   tabs.addView(title,new LinearLayout.LayoutParams(0,dp(52),1));
   TextView plus=iconButton("+",32); tabs.addView(plus,p(58,52)); root.addView(tabs);
 
@@ -79,14 +79,14 @@ public class MainActivity extends Activity{
 
   homeSearch=new EditText(this); homeSearch.setSingleLine(true); homeSearch.setTextSize(18);
   homeSearch.setTextColor(brown); homeSearch.setHintTextColor(Color.rgb(150,137,116)); homeSearch.setHint("Search or enter address…");
-  homeSearch.setPadding(22,0,22,0); homeSearch.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_search,0,0,0);
+  homeSearch.setPadding(dp(22),0,dp(22),0); homeSearch.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_search,0,0,0);
   homeSearch.setCompoundDrawablePadding(14); homeSearch.setBackgroundResource(R.drawable.rounded_search); homeSearch.setIncludeFontPadding(true);
   LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,dp(62)); sp.topMargin=dp(18); homeLayer.addView(homeSearch,sp);
 
   HomeArtView art=new HomeArtView(this); LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,0,1f); ap.topMargin=dp(18); homeLayer.addView(art,ap);
   FrameLayout.LayoutParams homeLp=new FrameLayout.LayoutParams(-1,-1); homeLp.bottomMargin=dp(72); content.addView(homeLayer,homeLp);
 
-  LinearLayout nav=new LinearLayout(this); nav.setGravity(Gravity.CENTER); nav.setPadding(8,3,8,4);
+  LinearLayout nav=new LinearLayout(this); nav.setGravity(Gravity.CENTER); nav.setPadding(dp(8),dp(3),dp(8),dp(4));
   String[] labs={"⌂\nHome","☆\nBookmarks","◷\nHistory","☰\nMenu"};
   for(String s:labs){
    TextView n=tv(s,13); n.setTextColor(brown); n.setLineSpacing(0,.9f); n.setIncludeFontPadding(true); n.setGravity(Gravity.CENTER);
