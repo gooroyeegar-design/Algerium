@@ -13,6 +13,7 @@ public class PageView extends View {
     String url="", html="";
     ArrayList<String> stack=new ArrayList<>();
     int pos=-1;
+    private volatile int loadGeneration=0;
     float scroll=0, sy, downX, downY;
     ArrayList<Block> blocks=new ArrayList<>();
     ArrayList<Link> links=new ArrayList<>();
@@ -35,27 +36,42 @@ public class PageView extends View {
         setFocusable(true);
     }
     public void setNavigationListener(NavigationListener l){navigationListener=l;}
-    void home(){blocks.clear();links.clear();scroll=0;setBackgroundColor(Color.rgb(243,232,210));invalidate();}
+    void home(){loadGeneration++;blocks.clear();links.clear();scroll=0;setBackgroundColor(Color.rgb(243,232,210));invalidate();}
 
     void load(String u){
+        final int token=++loadGeneration;
         if(u.equals("about:home")){home();return;}
         if(!BrowserPolicy.isHttpUrl(u)){error(u,"Blocked URL scheme");return;}
         new Thread(()->{
+            HttpURLConnection c=null;
             try{
-                HttpURLConnection c=(HttpURLConnection)new URL(u).openConnection();
-                c.setInstanceFollowRedirects(true); c.setConnectTimeout(12000); c.setReadTimeout(20000);
+                c=(HttpURLConnection)new URL(u).openConnection();
+                c.setInstanceFollowRedirects(true);
+                c.setConnectTimeout(12000);
+                c.setReadTimeout(20000);
                 c.setRequestProperty("User-Agent","Algerium/1.0");
                 c.setRequestProperty("Accept","text/html,application/xhtml+xml,text/plain,*/*");
                 int code=c.getResponseCode();
-                InputStream in=code>=400?c.getErrorStream():c.getInputStream();
-                String h=BrowserPolicy.readLimited(in,BrowserPolicy.pageLimit());
+                InputStream stream=code>=400?c.getErrorStream():c.getInputStream();
+                String h;
+                try(InputStream in=stream){h=BrowserPolicy.readLimited(in,BrowserPolicy.pageLimit());}
+                if(token!=loadGeneration)return;
                 String finalUrl=c.getURL().toString();
+                if(!BrowserPolicy.isHttpUrl(finalUrl))throw new IOException("Redirected to an invalid URL");
                 String rendered=isSearchPage(finalUrl)?h:JsEngine.get().run(h,finalUrl);
                 rendered=stripNonRenderableScripts(rendered);
                 final String pageHtml=rendered;
-                post(()->{url=finalUrl;html=pageHtml;push(finalUrl);parse();invalidate();});
-            }catch(Exception e){post(()->error(u,e.toString()));}
-        }).start();
+                post(()->{
+                    if(token!=loadGeneration)return;
+                    url=finalUrl;html=pageHtml;push(finalUrl);parse();invalidate();
+                });
+            }catch(Exception e){
+                final String message=e.toString();
+                post(()->{if(token==loadGeneration)error(u,message);});
+            }finally{
+                if(c!=null)c.disconnect();
+            }
+        },"Algerium-page-load").start();
     }
 
     void push(String u){
