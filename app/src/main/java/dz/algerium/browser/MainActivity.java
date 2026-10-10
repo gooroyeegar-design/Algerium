@@ -83,7 +83,7 @@ public class MainActivity extends Activity{
   LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,62); sp.topMargin=18; homeLayer.addView(homeSearch,sp);
 
   HomeArtView art=new HomeArtView(this); LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,0,1f); ap.topMargin=18; homeLayer.addView(art,ap);
-  content.addView(homeLayer,new FrameLayout.LayoutParams(-1,-1));
+  FrameLayout.LayoutParams homeLp=new FrameLayout.LayoutParams(-1,-1); homeLp.bottomMargin=72; content.addView(homeLayer,homeLp);
 
   LinearLayout nav=new LinearLayout(this); nav.setGravity(Gravity.CENTER); nav.setPadding(8,3,8,4);
   String[] labs={"⌂\nHome","☆\nBookmarks","◷\nHistory","☰\nMenu"};
