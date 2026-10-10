@@ -47,7 +47,7 @@ public class MainActivity extends Activity{
   LinearLayout tabs=new LinearLayout(this); tabs.setGravity(Gravity.CENTER_VERTICAL); tabs.setPadding(12,5,8,0);
   title=tv("Algerium",17); title.setTextColor(green); title.setGravity(Gravity.CENTER_VERTICAL);
   title.setPadding(14,0,0,0); title.setBackground(bg(Color.rgb(250,242,227),26));
-  tabs.addView(title,new LinearLayout.LayoutParams(0,52,1));
+  tabs.addView(title,new LinearLayout.LayoutParams(0,dp(52),1));
   TextView plus=iconButton("+",32); tabs.addView(plus,p(58,52)); root.addView(tabs);
 
   LinearLayout bar=new LinearLayout(this); bar.setGravity(Gravity.CENTER_VERTICAL); bar.setPadding(10,4,10,5);
@@ -57,12 +57,12 @@ public class MainActivity extends Activity{
   address.setTextColor(brown); address.setHintTextColor(Color.rgb(150,137,116)); address.setHint("Search or enter address…");
   address.setPadding(18,0,18,0); address.setBackgroundResource(R.drawable.rounded_search);
   address.setImeOptions(EditorInfo.IME_ACTION_GO); address.setIncludeFontPadding(true);
-  bar.addView(address,new LinearLayout.LayoutParams(0,46,1));
+  bar.addView(address,new LinearLayout.LayoutParams(0,dp(46),1));
   TextView menu=iconButton("⋮",27); bar.addView(menu,p(42,46)); root.addView(bar);
 
   FrameLayout content=new FrameLayout(this);
   page=new PageView(this); page.setNavigationListener(u->navigate(u));
-  FrameLayout.LayoutParams pageLp=new FrameLayout.LayoutParams(-1,-1); pageLp.bottomMargin=72; content.addView(page,pageLp);
+  FrameLayout.LayoutParams pageLp=new FrameLayout.LayoutParams(-1,-1); pageLp.bottomMargin=dp(72); content.addView(page,pageLp);
 
   homeLayer=new LinearLayout(this); homeLayer.setOrientation(LinearLayout.VERTICAL);
   homeLayer.setGravity(Gravity.CENTER_HORIZONTAL); homeLayer.setPadding(24,18,24,14);
@@ -72,27 +72,27 @@ public class MainActivity extends Activity{
 
   TextView brand=tv("Algerium",38); brand.setTextColor(green);
   brand.setTypeface(android.graphics.Typeface.create("sans",android.graphics.Typeface.NORMAL)); brand.setLetterSpacing(.01f);
-  homeLayer.addView(brand,new LinearLayout.LayoutParams(-1,54));
+  homeLayer.addView(brand,new LinearLayout.LayoutParams(-1,dp(54)));
 
   TextView tagline=tv("a browser for Algeria",17); tagline.setTextColor(brown); tagline.setLetterSpacing(.18f);
-  homeLayer.addView(tagline,new LinearLayout.LayoutParams(-1,40));
+  homeLayer.addView(tagline,new LinearLayout.LayoutParams(-1,dp(40)));
 
   homeSearch=new EditText(this); homeSearch.setSingleLine(true); homeSearch.setTextSize(18);
   homeSearch.setTextColor(brown); homeSearch.setHintTextColor(Color.rgb(150,137,116)); homeSearch.setHint("Search or enter address…");
   homeSearch.setPadding(22,0,22,0); homeSearch.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.ic_menu_search,0,0,0);
   homeSearch.setCompoundDrawablePadding(14); homeSearch.setBackgroundResource(R.drawable.rounded_search); homeSearch.setIncludeFontPadding(true);
-  LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,62); sp.topMargin=18; homeLayer.addView(homeSearch,sp);
+  LinearLayout.LayoutParams sp=new LinearLayout.LayoutParams(-1,dp(62)); sp.topMargin=dp(18); homeLayer.addView(homeSearch,sp);
 
-  HomeArtView art=new HomeArtView(this); LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,0,1f); ap.topMargin=18; homeLayer.addView(art,ap);
-  FrameLayout.LayoutParams homeLp=new FrameLayout.LayoutParams(-1,-1); homeLp.bottomMargin=72; content.addView(homeLayer,homeLp);
+  HomeArtView art=new HomeArtView(this); LinearLayout.LayoutParams ap=new LinearLayout.LayoutParams(-1,0,1f); ap.topMargin=dp(18); homeLayer.addView(art,ap);
+  FrameLayout.LayoutParams homeLp=new FrameLayout.LayoutParams(-1,-1); homeLp.bottomMargin=dp(72); content.addView(homeLayer,homeLp);
 
   LinearLayout nav=new LinearLayout(this); nav.setGravity(Gravity.CENTER); nav.setPadding(8,3,8,4);
   String[] labs={"⌂\nHome","☆\nBookmarks","◷\nHistory","☰\nMenu"};
   for(String s:labs){
    TextView n=tv(s,13); n.setTextColor(brown); n.setLineSpacing(0,.9f); n.setIncludeFontPadding(true); n.setGravity(Gravity.CENTER);
-   nav.addView(n,new LinearLayout.LayoutParams(0,72,1));
+   nav.addView(n,new LinearLayout.LayoutParams(0,dp(72),1));
   }
-  FrameLayout.LayoutParams np=new FrameLayout.LayoutParams(-1,72,Gravity.BOTTOM); content.addView(nav,np);
+  FrameLayout.LayoutParams np=new FrameLayout.LayoutParams(-1,dp(72),Gravity.BOTTOM); content.addView(nav,np);
   root.addView(content,new LinearLayout.LayoutParams(-1,0,1)); setContentView(root);
 
   address.setOnEditorActionListener((v,a,e)->{navigate(address.getText().toString());return true;});
