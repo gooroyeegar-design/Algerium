@@ -44,18 +44,18 @@ public class MainActivity extends Activity{
  void build(){
   LinearLayout root=new LinearLayout(this); root.setOrientation(LinearLayout.VERTICAL); root.setBackgroundColor(beige);
 
-  LinearLayout tabs=new LinearLayout(this); tabs.setGravity(Gravity.CENTER_VERTICAL); tabs.setPadding(12,5,8,0);
+  LinearLayout tabs=new LinearLayout(this); tabs.setGravity(Gravity.CENTER_VERTICAL); tabs.setPadding(dp(12),dp(5),dp(8),0);
   title=tv("Algerium",17); title.setTextColor(green); title.setGravity(Gravity.CENTER_VERTICAL);
   title.setPadding(14,0,0,0); title.setBackground(bg(Color.rgb(250,242,227),26));
   tabs.addView(title,new LinearLayout.LayoutParams(0,dp(52),1));
   TextView plus=iconButton("+",32); tabs.addView(plus,p(58,52)); root.addView(tabs);
 
-  LinearLayout bar=new LinearLayout(this); bar.setGravity(Gravity.CENTER_VERTICAL); bar.setPadding(10,4,10,5);
+  LinearLayout bar=new LinearLayout(this); bar.setGravity(Gravity.CENTER_VERTICAL); bar.setPadding(dp(10),dp(4),dp(10),dp(5));
   TextView back=iconButton("‹",34), fwd=iconButton("›",34), reload=iconButton("↻",28);
   bar.addView(back,p(42,46)); bar.addView(fwd,p(42,46)); bar.addView(reload,p(42,46));
   address=new EditText(this); address.setSingleLine(true); address.setTextSize(16);
   address.setTextColor(brown); address.setHintTextColor(Color.rgb(150,137,116)); address.setHint("Search or enter address…");
-  address.setPadding(18,0,18,0); address.setBackgroundResource(R.drawable.rounded_search);
+  address.setPadding(dp(18),0,dp(18),0); address.setBackgroundResource(R.drawable.rounded_search);
   address.setImeOptions(EditorInfo.IME_ACTION_GO); address.setIncludeFontPadding(true);
   bar.addView(address,new LinearLayout.LayoutParams(0,dp(46),1));
   TextView menu=iconButton("⋮",27); bar.addView(menu,p(42,46)); root.addView(bar);
