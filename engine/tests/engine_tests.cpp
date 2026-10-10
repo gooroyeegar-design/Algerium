@@ -1,5 +1,6 @@
 #include "algerium/engine.h"
 #include "algerium/render.h"
+#include <algorithm>
 #include <cassert>
 #include <iostream>
 int main(){
@@ -14,5 +15,9 @@ int main(){
  assert(hs[0]->children.size()==1&&hs[0]->children[0]->text=="Hello & world");
  assert(p.boxes.size()>=5);
  auto paint=paint_document(p.document,p.boxes);assert(!paint.empty());
+ auto duplicateLabels=std::count_if(paint.begin(),paint.end(),[](const PaintCommand&cmd){
+  return cmd.type==PaintCommand::Type::Text&&cmd.text=="Hello & world";
+ });
+ assert(duplicateLabels==1);
  std::cout<<"Algerium engine compatibility smoke tests passed\n";
 }
