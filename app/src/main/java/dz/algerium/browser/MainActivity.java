@@ -34,7 +34,8 @@ public class MainActivity extends Activity{
   x.setPadding(0,0,0,0); x.setMinHeight(0); x.setMinWidth(0);
   x.setBackgroundColor(Color.TRANSPARENT); return x;
  }
- LinearLayout.LayoutParams p(int w,int h){return new LinearLayout.LayoutParams(w,h);}
+ int dp(float value){return (int)(value*getResources().getDisplayMetrics().density+0.5f);}
+ LinearLayout.LayoutParams p(int w,int h){return new LinearLayout.LayoutParams(w<0?w:dp(w),h<0?h:dp(h));}
  GradientDrawable bg(int color,float r){
   GradientDrawable g=new GradientDrawable(); g.setColor(color); g.setCornerRadius(r);
   g.setStroke(1,Color.rgb(229,215,190)); return g;
